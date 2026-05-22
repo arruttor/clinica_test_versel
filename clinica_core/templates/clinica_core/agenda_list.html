@@ -1,0 +1,194 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Agenda de Atendimentos{% endblock %}
+{% block page_title %}Agenda de Clínica{% endblock %}
+{% block nav_agenda %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold{% endblock %}
+
+{% block content %}
+<div class="p-8">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <i class="ph ph-calendar-check text-indigo-500"></i> Gestão de Agenda
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                {% if clinica_usuario %}
+                Mostrando os itens filtrados de <strong>{{ clinica_usuario.get_nome_display }}</strong>.
+                {% else %}
+                Mostrando todos os registros globais de agendamentos.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="flex gap-4 mb-6 border-b border-slate-200 dark:border-slate-700">
+        <a href="?tab=pendentes" class="px-4 py-3 font-medium text-sm transition-colors {% if tab == 'pendentes' %}border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-bold{% else %}text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200{% endif %}">
+            <i class="ph ph-hourglass-medium mr-1"></i> Aguardando Vaga
+        </a>
+        <a href="?tab=agendados" class="px-4 py-3 font-medium text-sm transition-colors {% if tab == 'agendados' %}border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-bold{% else %}text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200{% endif %}">
+            <i class="ph ph-calendar text-emerald-500 mr-1"></i> Consultas Agendadas
+        </a>
+        <a href="?tab=finalizados" class="px-4 py-3 font-medium text-sm transition-colors {% if tab == 'finalizados' %}border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 font-bold{% else %}text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200{% endif %}">
+            <i class="ph ph-checks text-slate-500 mr-1"></i> Consultas Finalizadas
+        </a>
+        <a href="{% url 'agenda_calendario' %}" class="px-4 py-3 font-medium text-sm transition-colors text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 ml-auto flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-t-lg border-b-2 border-indigo-500">
+            <i class="ph ph-calendar-dots text-indigo-500"></i> Calendário Semanal
+        </a>
+    </div>
+
+    <!-- Tabela -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm transition-colors duration-300">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-max">
+                {% if tab == 'pendentes' %}
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th class="px-6 py-4">Entrada na Fila</th>
+                        <th class="px-6 py-4">Nome do Requerente</th>
+                        <th class="px-6 py-4">Contato</th>
+                        <th class="px-6 py-4">Especialidade / Clínica</th>
+                        <th class="px-6 py-4 text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for item in listas %}
+                    <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                            <i class="ph ph-calendar-blank text-slate-400 mr-1"></i> {{ item.data_hora_marcacao|date:"d/m/Y - H:i" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900 dark:text-white">{{ item.pessoa }}</div>
+                            {% if item.observacao %}
+                            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]" title="{{ item.observacao }}">{{ item.observacao }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
+                            {{ item.celular }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300">
+                                {{ item.clinica.get_nome_display }}
+                            </span>
+                            {% if item.clinica_odonto %}
+                                <div class="text-xs text-slate-500 mt-1 pl-1">&bull; {{ item.clinica_odonto.nome }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{% url 'agenda_agendar' item.pk %}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-lg font-bold text-xs shadow-sm shadow-indigo-200 dark:shadow-indigo-900/50 transition">
+                                <i class="ph ph-calendar-plus text-base"></i> Agendar Atendimento
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-16 text-center text-slate-500 dark:text-slate-500">
+                            <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+                                <i class="ph ph-check-circle text-4xl text-emerald-500"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">A Fila está vazia</h3>
+                            <p>Não há nenhum paciente aguardando atendimento para sua clínica neste momento.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% else %}
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th class="px-6 py-4">Data e Hora</th>
+                        <th class="px-6 py-4">Paciente</th>
+                        <th class="px-6 py-4">Professor/Resp.</th>
+                        <th class="px-6 py-4">Box / Sala</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-center">Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for m in marcacoes %}
+                    <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                            <div class="font-bold text-indigo-600 dark:text-indigo-400">{{ m.data_hora|date:"d/m/Y" }}</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1"><i class="ph ph-clock"></i> {{ m.data_hora|date:"H:i" }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-900 dark:text-white">{{ m.paciente.nome }}</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ m.clinica.get_nome_display }}</div>
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
+                            {% if m.professor %}
+                                <i class="ph ph-chalkboard-teacher mr-1 text-slate-400"></i> {{ m.professor.nome }}
+                            {% elif m.academico %}
+                                <i class="ph ph-student mr-1 text-slate-400"></i> {{ m.academico.nome }}
+                            {% else %}
+                                <span class="text-slate-400 italic">Não Atribuído</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if m.box %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400 border border-sky-200 dark:border-sky-500/20 whitespace-nowrap">
+                                    <i class="ph ph-door text-sky-500"></i> {{ m.box.nome }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400 dark:text-slate-600 text-xs">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if m.status == 'CONFIRMADO' %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Confirmado</span>
+                            {% elif m.status == 'EM_ATENDIMENTO' %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-teal-50 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300 border border-teal-300 dark:border-teal-500/30">
+                                    <span class="relative flex h-2 w-2">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                                    </span>
+                                    Em Atendimento
+                                </span>
+                            {% elif m.status == 'EM_ESPERA' %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Aguardando</span>
+                            {% elif m.status == 'AGUARDANDO_SUPERVISOR' %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20"><span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span> Aguard. Supervisor</span>
+                            {% elif m.status == 'CONCLUIDO' %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Finalizado</span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> {{ m.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{% url 'paciente_prontuario' m.paciente.pk %}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-bold text-xs transition">
+                                    <i class="ph ph-folder-user text-base"></i> Ver Prontuário
+                                </a>
+                                {% if tab == 'agendados' and m.status == 'CONFIRMADO' %}
+                                <form method="POST" action="{% url 'marcacao_iniciar_atendimento' m.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-500 hover:bg-teal-600 dark:bg-teal-500 dark:hover:bg-teal-600 text-white rounded-lg font-bold text-xs shadow-sm shadow-teal-200 dark:shadow-teal-900/50 transition">
+                                        <i class="ph ph-heartbeat text-base"></i> Iniciar Atendimento
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% if tab == 'agendados' and m.status != 'CONCLUIDO' %}
+                                <a href="{% url 'agenda_finalizar' m.pk %}" class="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white rounded-lg font-bold text-xs shadow-sm shadow-emerald-200 dark:shadow-emerald-900/50 transition">
+                                    <i class="ph ph-check-circle text-base"></i> Finalizar
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center text-slate-500 dark:text-slate-500">
+                            <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+                                <i class="ph ph-calendar-x text-4xl text-slate-400"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">Nenhum Registro Aqui</h3>
+                            <p>Não há consultas listadas sob essa aba no momento.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

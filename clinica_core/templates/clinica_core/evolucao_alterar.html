@@ -1,0 +1,128 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Alterar Avaliação Clínica{% endblock %}
+{% block page_title %}Correção de Parecer Docente{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-4xl mx-auto w-full">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <a href="{% url 'evolucao_aprovar' evolucao.pk %}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+                <i class="ph ph-arrow-left"></i> Voltar para a Avaliação
+            </a>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <i class="ph ph-pencil-simple text-amber-500"></i> Alterar Avaliação
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Modificando o parecer de <strong class="text-slate-700 dark:text-slate-300">{{ evolucao.paciente.nome }}</strong>.</p>
+        </div>
+    </div>
+
+    <!-- Leitura da Evolução do Aluno -->
+    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm mb-8 transition-colors duration-300">
+        <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 flex justify-between items-center">
+            <span>EVOLUÇÃO REGISTRADA PELO ALUNO</span>
+            <span class="bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1 rounded-full text-xs uppercase tracking-wider font-bold">
+                {{ evolucao.date_create|date:"d/m/Y" }}
+            </span>
+        </h3>
+        
+        <div class="p-4 bg-white dark:bg-darkcard rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 text-sm whitespace-pre-wrap leading-relaxed shadow-sm opacity-80">
+{{ evolucao.descricao }}
+        </div>
+    </div>
+
+    <!-- Formulário de Alteração de Nota -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-amber-200 dark:border-amber-700/50 p-6 shadow-sm mb-8 transition-colors duration-300 relative overflow-hidden">
+        <!-- strip indicador de edicao -->
+        <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2 flex items-center gap-2 pl-3">
+            Modificar a Pontuação Atual
+        </h3>
+        
+        <form method="POST" class="space-y-6 pl-3">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-sm font-medium">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <div class="w-full sm:w-1/3">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nota / Pontuação (0 a 10)</label>
+                    <div class="relative">
+                        <i class="ph ph-star absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 text-lg"></i>
+                        <div class="pl-10">
+                            {{ form.nota }}
+                        </div>
+                    </div>
+                    {% if form.nota.errors %}
+                        <p class="mt-1 text-sm text-rose-500 font-medium">{{ form.nota.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Novo Comentário do Professor</label>
+                    {{ form.observacao_supervisor }}
+                    {% if form.observacao_supervisor.errors %}
+                        <p class="mt-1 text-sm text-rose-500 font-medium">{{ form.observacao_supervisor.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-red-50 dark:bg-rose-500/10 border border-red-200 dark:border-rose-500/30 rounded-xl p-6 mt-8">
+                <h4 class="font-bold text-red-800 dark:text-rose-400 flex items-center gap-2 mb-4">
+                    <i class="ph ph-lock-key"></i> Confirmação de Identidade Exigida
+                </h4>
+                <p class="text-sm text-red-700 dark:text-rose-300 mb-4">
+                    Para garantir a segurança acadêmica do processo, por favor <strong>digite sua senha de acesso</strong> (a mesma usada para o login no sistema) antes de confirmar essas alterações. Esta re-avaliação será rastreada.
+                </p>
+                <div class="w-full sm:w-1/2">
+                    {{ form.senha }}
+                    {% if form.senha.errors %}
+                        <p class="mt-2 text-sm text-rose-600 bg-white/50 p-2 rounded border border-rose-200 shadow-sm font-bold">{{ form.senha.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end items-center gap-4 pt-6 mt-6">
+                <button type="submit" class="px-8 py-3 rounded-lg bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 text-white font-bold transition flex items-center justify-center gap-2 shadow-md shadow-amber-200 dark:shadow-amber-900/50 w-full sm:w-auto text-sm">
+                    <i class="ph ph-floppy-disk text-lg"></i> Salvar Nova Avaliação
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Histórico de Alterações -->
+    {% if logs %}
+    <div class="bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-inner transition-colors duration-300">
+        <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-6 flex items-center gap-2">
+            <i class="ph ph-clock-counter-clockwise"></i> Histórico de Alterações
+        </h3>
+        
+        <div class="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent dark:before:via-slate-700">
+            {% for log in logs %}
+            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white dark:border-slate-900 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+                    <i class="ph ph-user"></i>
+                </div>
+                <!-- Box do histórico -->
+                <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-darkcard shadow-sm">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 gap-2">
+                        <div class="font-bold text-slate-900 dark:text-white text-sm">{{ log.professor.nome|default:"Professor Desconhecido" }}</div>
+                        <time class="font-medium text-xs text-slate-500 dark:text-slate-400">{{ log.data_alteracao|date:"d/m/Y H:i" }}</time>
+                    </div>
+                    <div class="text-slate-600 dark:text-slate-400 text-xs">
+                        <p><strong>Nota Anterior:</strong> {{ log.nota_anterior|default:"--" }} &rarr; <strong>Nova Nota:</strong> {{ log.nota_nova|default:"--" }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

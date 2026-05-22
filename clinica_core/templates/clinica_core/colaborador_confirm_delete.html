@@ -1,0 +1,27 @@
+{% extends 'clinica_core/base.html' %}
+{% block title %}Excluir Colaborador{% endblock %}
+{% block content %}
+<div class="p-8 max-w-xl mx-auto mt-10">
+    <div class="bg-white dark:bg-darkcard rounded-3xl border border-rose-200 dark:border-rose-900/50 p-10 text-center shadow-lg shadow-rose-100 dark:shadow-none">
+        
+        <div class="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="ph ph-warning-circle text-4xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Excluir Membro</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-8">
+            Tem certeza que deseja remover o acesso do colaborador <strong>{{ colaborador.nome }}</strong>? Esta ação não pode ser desfeita.
+        </p>
+
+        <form method="POST" class="flex flex-col gap-3">
+            {% csrf_token %}
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition shadow-md shadow-rose-200 dark:shadow-rose-900/50 flex items-center justify-center gap-2">
+                <i class="ph ph-trash"></i> Sim, Apagar Membro
+            </button>
+            <a href="{% url 'colaborador_list' %}" class="w-full py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold transition flex items-center justify-center">
+                Cancelar
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

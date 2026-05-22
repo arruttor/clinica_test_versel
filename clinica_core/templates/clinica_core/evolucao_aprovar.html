@@ -1,0 +1,126 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Avaliar Evolução Clínica{% endblock %}
+{% block page_title %}Avaliação de Prontuário{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-4xl mx-auto w-full">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <a href="{% url 'aprovacoes_pendentes' %}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+                <i class="ph ph-arrow-left"></i> Voltar para Caixa de Entrada
+            </a>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <i class="ph ph-exam text-indigo-500"></i> Parecer Docente
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Avaliando a evolução do paciente <strong class="text-slate-700 dark:text-slate-300">{{ evolucao.paciente.nome }}</strong>.</p>
+        </div>
+    </div>
+
+    <!-- Leitura da Evolução do Aluno -->
+    <div class="bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border-l-4 border-l-indigo-500 border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm mb-8 transition-colors duration-300">
+        <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 mb-4 flex justify-between items-center">
+            <span>RESUMO REDIGIDO PELO ALUNO</span>
+            <span class="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full text-xs uppercase tracking-wider font-bold">
+                Data: {{ evolucao.date_create|date:"d/m/Y - H:i" }}
+            </span>
+        </h3>
+        
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-300">
+                {{ evolucao.user_create.username|slice:":2"|upper|default:"AL" }}
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ evolucao.user_create.get_full_name|default:evolucao.user_create.username }}</p>
+                <p class="text-xs text-slate-500">Acadêmico Autor</p>
+            </div>
+        </div>
+
+        <div class="p-4 bg-white dark:bg-darkcard rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm whitespace-pre-wrap leading-relaxed shadow-sm">
+{{ evolucao.descricao }}
+        </div>
+    </div>
+
+    <!-- Formulário de Aprovação e Nota -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm mb-8 transition-colors duration-300">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2 flex items-center gap-2">
+            <i class="ph ph-check-square-offset text-emerald-500"></i> Oficializar e Pontuar
+        </h3>
+        
+        {% if evolucao.status == 'APROVADO' %}
+        <div class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4 mb-4">
+            <div class="flex items-start gap-4 flex-1">
+                <div class="text-emerald-500 text-2xl"><i class="ph ph-check-circle"></i></div>
+                <div>
+                    <h4 class="font-bold text-emerald-800 dark:text-emerald-400">Esta evolução já foi aprovada.</h4>
+                    <p class="text-sm text-emerald-700 dark:text-emerald-500 mt-1">A nota atribuída foi <strong>{{ evolucao.nota|default:"--" }}</strong>. Caso seja estritamente necessário, é possível alterá-la.</p>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'evolucao_alterar' evolucao.pk %}" class="px-4 py-2 bg-white dark:bg-emerald-800 text-emerald-700 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-700 rounded-lg text-sm font-bold shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-700 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                    <i class="ph ph-pencil-simple"></i> Alterar Avaliação
+                </a>
+            </div>
+        </div>
+        
+        <div class="space-y-4 opacity-70 cursor-not-allowed">
+            <div class="w-full sm:w-1/3">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nota Atribuída</label>
+                <div class="relative">
+                    <i class="ph ph-star absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 text-lg"></i>
+                    <input type="text" disabled value="{{ evolucao.nota }}" class="pl-10 w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white cursor-not-allowed">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Comentário do Professor</label>
+                <textarea disabled class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-3 text-slate-900 dark:text-white rows-3 cursor-not-allowed">{{ evolucao.observacao_supervisor }}</textarea>
+            </div>
+        </div>
+        {% else %}
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <div class="space-y-4">
+                <div class="w-full sm:w-1/3">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nota / Pontuação (0 a 10)</label>
+                    <div class="relative">
+                        <i class="ph ph-star absolute left-3 top-1/2 transform -translate-y-1/2 text-amber-500 text-lg"></i>
+                        <div class="pl-10">
+                            {{ form.nota }}
+                        </div>
+                    </div>
+                    {% if form.nota.errors %}
+                        <p class="mt-1 text-sm text-rose-500">{{ form.nota.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Comentário do Professor (Opcional)</label>
+                    {{ form.observacao_supervisor }}
+                    <p class="text-xs text-slate-500 mt-1">Este feedback aparecerá na caixa do prontuário para que o aluno leia.</p>
+                    {% if form.observacao_supervisor.errors %}
+                        <p class="mt-1 text-sm text-rose-500">{{ form.observacao_supervisor.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-slate-100 dark:border-slate-800 mt-6">
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+                    <i class="ph ph-info text-indigo-500"></i> Ao clicar em Aprovar, este registro será bloqueado de edições/deleções e constará no histórico oficial do paciente.
+                </p>
+                <button type="submit" class="px-8 py-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold transition flex items-center justify-center gap-2 shadow-md shadow-emerald-200 dark:shadow-emerald-900/50 w-full sm:w-auto text-sm">
+                    <i class="ph ph-check-circle text-lg"></i> Aprovar Definitivamente
+                </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

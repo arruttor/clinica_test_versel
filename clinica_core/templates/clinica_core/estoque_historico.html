@@ -1,0 +1,79 @@
+{% extends 'clinica_core/base.html' %}
+{% block title %}Histórico — {{ item.nome }}{% endblock %}
+{% block page_title %}Almoxarifado{% endblock %}
+{% block nav_estoque %}bg-slate-100 dark:bg-slate-800/80 text-amber-600 dark:text-amber-400{% endblock %}
+
+{% block content %}
+<div class="p-8">
+
+    <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <a href="{% url 'estoque_list' %}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition mb-2">
+                <i class="ph ph-arrow-left"></i> Voltar ao Almoxarifado
+            </a>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Histórico: {{ item.nome }}</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Estoque atual:
+                <strong class="{% if item.estoque_baixo %}text-rose-600 dark:text-rose-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">
+                    {{ item.estoque_atual }} {{ item.unidade }}
+                </strong>
+                &nbsp;·&nbsp; Mínimo: {{ item.estoque_minimo }}
+            </p>
+        </div>
+        <a href="{% url 'estoque_movimentar' item.pk %}" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-all hover:scale-105 text-sm">
+            <i class="ph ph-arrows-left-right text-lg"></i> Nova Movimentação
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th class="px-6 py-4">Data</th>
+                        <th class="px-6 py-4">Tipo</th>
+                        <th class="px-6 py-4 text-center">Quantidade</th>
+                        <th class="px-6 py-4">Motivo</th>
+                        <th class="px-6 py-4">Responsável</th>
+                        <th class="px-6 py-4">Observação</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm divide-y divide-slate-100 dark:divide-slate-700/50">
+                    {% for mov in movimentacoes %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 font-medium text-slate-900 dark:text-white text-nowrap">
+                            {{ mov.data|date:"d/m/Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if mov.tipo == 'ENTRADA' %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full">
+                                    <i class="ph ph-arrow-circle-down"></i> Entrada
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-xs font-bold rounded-full">
+                                    <i class="ph ph-arrow-circle-up"></i> Saída
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center font-bold {% if mov.tipo == 'ENTRADA' %}text-emerald-600 dark:text-emerald-400{% else %}text-rose-600 dark:text-rose-400{% endif %}">
+                            {% if mov.tipo == 'ENTRADA' %}+{% else %}-{% endif %}{{ mov.quantidade }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ mov.motivo|default:"—" }}</td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400">{{ mov.responsavel.username|default:"—" }}</td>
+                        <td class="px-6 py-4 text-slate-500 dark:text-slate-500 text-xs max-w-xs truncate">{{ mov.observacao|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center">
+                            <i class="ph ph-clock-clockwise text-5xl text-slate-300 dark:text-slate-600 block mb-3"></i>
+                            <p class="text-slate-500 dark:text-slate-400 font-medium">Nenhuma movimentação registrada para este item.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

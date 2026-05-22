@@ -1,0 +1,84 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - {{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block submenu_cadastros %}block{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-2xl mx-auto w-full">
+    
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ titulo }}</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Preencha os dados dos alunos e sua devida lotação clínica.</p>
+        </div>
+        <a href="{% url 'dupla_list' %}" class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white font-medium transition flex items-center gap-2">
+            <i class="ph ph-arrow-left text-lg"></i> Voltar
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 md:p-8 shadow-sm transition-colors duration-300">
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-lg">
+                <p class="text-rose-700 dark:text-rose-400 text-sm font-bold mb-2">Por favor, corrija os erros abaixo:</p>
+                <div class="text-sm text-rose-600 dark:text-rose-300">
+                    {{ form.non_field_errors }}
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Identificação / Sufixo (Opcional)</label>
+                {{ form.nome }}
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Ex: Equipe Alpha, Dupla da Manhã. Deixe vazia para auto-gerar baseado nos nomes.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Turma / Sub-clínica de Odontologia</label>
+                {{ form.clinica_odonto }}
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-4 uppercase tracking-wider flex items-center gap-2">
+                    <i class="ph ph-users text-indigo-500"></i> Membros da Equipe
+                </h3>
+                
+                <div class="grid grid-cols-1 gap-5">
+                    <div class="bg-indigo-50/50 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/20 p-4 rounded-xl">
+                        <label class="block text-sm font-bold text-indigo-900 dark:text-indigo-300 mb-2">Acadêmico / Aluno 1 (Titular)</label>
+                        {{ form.aluno1 }}
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 p-4 rounded-xl">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Acadêmico / Aluno 2 (Opcional)</label>
+                        {{ form.aluno2 }}
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-2"><i class="ph ph-info"></i> Deixe em branco caso o aluno deseje atuar momentaneamente ou permanentemente de maneira individual nesta disciplina.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 mt-8">
+                <a href="{% url 'dupla_list' %}" class="px-5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-sm transition">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-bold text-sm transition shadow-md shadow-indigo-200 dark:shadow-indigo-600/30 flex items-center gap-2">
+                    <i class="ph ph-check-circle text-lg"></i> {{ btn_texto }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,506 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dashboard %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+
+{% block content %}
+<div class="p-8">
+    
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Visão Geral</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">{{ data_extensa }}</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{% url 'dashboard' %}" class="px-4 py-1.5 rounded-full text-sm flex items-center gap-2 border shadow-sm transition hover:scale-105 {% if not filtro_clinica %}bg-white dark:bg-slate-800 border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-300{% else %}bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-200 dark:hover:border-slate-700{% endif %}"><div class="w-2 h-2 rounded-full bg-indigo-500"></div> Todos</a>
+            
+            <a href="{% url 'dashboard' %}?clinica=OD" class="px-4 py-1.5 rounded-full text-sm flex items-center gap-2 border shadow-sm transition hover:scale-105 {% if filtro_clinica == 'OD' %}bg-white dark:bg-slate-800 border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-300{% else %}bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-200 dark:hover:border-slate-700{% endif %}"><div class="w-2 h-2 rounded-full bg-teal-500 dark:bg-teal-400"></div> Odontologia</a>
+            
+            <a href="{% url 'dashboard' %}?clinica=PS" class="px-4 py-1.5 rounded-full text-sm flex items-center gap-2 border shadow-sm transition hover:scale-105 {% if filtro_clinica == 'PS' %}bg-white dark:bg-slate-800 border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-300{% else %}bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-200 dark:hover:border-slate-700{% endif %}"><div class="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400"></div> Psicologia</a>
+            
+            <a href="{% url 'dashboard' %}?clinica=FI" class="px-4 py-1.5 rounded-full text-sm flex items-center gap-2 border shadow-sm transition hover:scale-105 {% if filtro_clinica == 'FI' %}bg-white dark:bg-slate-800 border-orange-200 dark:border-orange-500/30 text-orange-700 dark:text-orange-300{% else %}bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-200 dark:hover:border-slate-700{% endif %}"><div class="w-2 h-2 rounded-full bg-orange-500 dark:bg-orange-400"></div> Fisioterapia</a>
+            
+            <a href="{% url 'dashboard' %}?clinica=EN" class="px-4 py-1.5 rounded-full text-sm flex items-center gap-2 border shadow-sm transition hover:scale-105 {% if filtro_clinica == 'EN' %}bg-white dark:bg-slate-800 border-rose-200 dark:border-enfermagem/30 text-rose-700 dark:text-enfermagem{% else %}bg-slate-50 dark:bg-slate-800/40 text-slate-500 dark:text-slate-400 border-transparent hover:border-slate-200 dark:hover:border-slate-700{% endif %}"><div class="w-2 h-2 rounded-full bg-rose-500 dark:bg-enfermagem"></div> Enfermagem</a>
+        </div>
+    </div>
+
+    <!-- CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total do Dia</span>
+                <div class="p-2.5 bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 rounded-xl"><i class="ph ph-users text-xl"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ total_dia|default:"0" }}</div>
+        </div>
+
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Aguardando Contato</span>
+                <div class="p-2.5 bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400 rounded-xl"><i class="ph ph-hourglass-high text-xl"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ aguardando|default:"0" }}</div>
+        </div>
+
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Prontos / Agendados</span>
+                <div class="p-2.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl"><i class="ph ph-calendar-check text-xl"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ agendados|default:"0" }}</div>
+        </div>
+
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Concluídos</span>
+                <div class="p-2.5 bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400 rounded-xl"><i class="ph ph-check-circle text-xl"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ concluidos|default:"0" }}</div>
+        </div>
+
+        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-slate-500 dark:text-slate-400 text-sm font-medium">Cancelados</span>
+                <div class="p-2.5 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 rounded-xl"><i class="ph ph-x-circle text-xl"></i></div>
+            </div>
+            <div class="text-3xl font-bold text-slate-900 dark:text-white mb-1">{{ cancelados|default:"0" }}</div>
+        </div>
+    </div>
+
+    <!-- ── ALERTAS INTELIGENTES ────────────────────────────────────────────── -->
+    {% if evolucoes_aguardando_count > 0 or itens_criticos_count > 0 %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+
+        {% if evolucoes_aguardando_count > 0 %}
+        <a href="{% url 'aprovacoes_pendentes' %}" class="group flex items-center gap-4 p-4 rounded-2xl border border-violet-200 dark:border-violet-500/30 bg-violet-50 dark:bg-violet-500/10 hover:bg-violet-100 dark:hover:bg-violet-500/20 transition-all duration-200 shadow-sm">
+            <div class="p-3 bg-violet-500 rounded-xl flex-shrink-0 shadow-lg shadow-violet-500/30">
+                <i class="ph ph-seal-warning text-2xl text-white"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-0.5">Ação Necessária</p>
+                <p class="text-slate-900 dark:text-white font-bold text-sm">{{ evolucoes_aguardando_count }} evoluções aguardando aprovação</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Prontuários pendentes de supervisão docente</p>
+            </div>
+            <i class="ph ph-arrow-right text-violet-400 dark:text-violet-500 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+        {% endif %}
+
+        {% if itens_criticos_count > 0 %}
+        <a href="{% url 'estoque_list' %}" class="group flex items-center gap-4 p-4 rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all duration-200 shadow-sm">
+            <div class="p-3 bg-amber-500 rounded-xl flex-shrink-0 shadow-lg shadow-amber-500/30">
+                <i class="ph ph-package text-2xl text-white"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-0.5">Estoque Crítico</p>
+                <p class="text-slate-900 dark:text-white font-bold text-sm">{{ itens_criticos_count }} item{{ itens_criticos_count|pluralize }} abaixo do mínimo</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Verifique o almoxarifado e reponha os insumos</p>
+            </div>
+            <i class="ph ph-arrow-right text-amber-400 dark:text-amber-500 group-hover:translate-x-1 transition-transform"></i>
+        </a>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+    <!-- LISTAGENS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="col-span-1 bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm flex flex-col transition-colors duration-300">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Agenda de Hoje</h3>
+            <div class="relative pl-4 border-l border-slate-200 dark:border-slate-700 space-y-6 flex-1">
+                {% for log in listas_hoje %}
+                <div class="relative">
+                    {% if log.clinica.nome == 'OD' %}
+                        <div class="absolute -left-5 top-1 w-2.5 h-2.5 rounded-full bg-teal-500 dark:bg-teal-400 ring-4 ring-white dark:ring-darkcard"></div>
+                    {% elif log.clinica.nome == 'PS' %}
+                        <div class="absolute -left-5 top-1 w-2.5 h-2.5 rounded-full bg-purple-500 dark:bg-purple-400 ring-4 ring-white dark:ring-darkcard"></div>
+                    {% elif log.clinica.nome == 'FI' %}
+                        <div class="absolute -left-5 top-1 w-2.5 h-2.5 rounded-full bg-orange-500 dark:bg-orange-400 ring-4 ring-white dark:ring-darkcard"></div>
+                    {% else %}
+                        <div class="absolute -left-5 top-1 w-2.5 h-2.5 rounded-full bg-rose-500 dark:bg-rose-400 ring-4 ring-white dark:ring-darkcard"></div>
+                    {% endif %}
+                    
+                    <span class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 block">{{ log.data_hora_marcacao|time:"H:i" }}</span>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700">
+                        <h4 class="font-bold text-slate-800 dark:text-white">{{ log.pessoa }}</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Celular: <span class="font-medium text-slate-700 dark:text-slate-300">{{ log.celular }}</span></p>
+                        
+                        {% if log.status == 'AGUARDANDO' %}
+                        <span class="inline-block mt-3 px-2.5 py-1 bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 text-[10px] font-bold rounded-md uppercase tracking-wide">Aguardando</span>
+                        {% elif log.status == 'AGENDADO' %}
+                        <span class="inline-block mt-3 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wide">Agendado</span>
+                        {% else %}
+                        <span class="inline-block mt-3 px-2.5 py-1 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-[10px] font-bold rounded-md uppercase tracking-wide">Cancelado</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-sm text-slate-500 italic mt-4">Nenhum evento na lista para a data de hoje.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-span-1 lg:col-span-2 bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm flex flex-col transition-colors duration-300">
+            <div class="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Ocorrências Recentes (Top 10)</h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Total rastreado via fila de espera</p>
+                </div>
+                <a href="{% url 'lista_espera_list' %}" class="text-indigo-600 dark:text-indigo-400 font-medium text-sm hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">Ver tabela completa &rarr;</a>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                            <th class="pb-3 text-nowrap pr-4">Data e Hora</th>
+                            <th class="pb-3 pr-4">Paciente</th>
+                            <th class="pb-3 pr-4">Celular (Secretária)</th>
+                            <th class="pb-3 pr-4">Clínica</th>
+                            <th class="pb-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        {% for item in todas_listas %}
+                        <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                            <td class="py-4 font-medium text-slate-900 dark:text-white pr-4 text-nowrap">{{ item.data_hora_marcacao|date:"d/m/Y H:i" }}</td>
+                            <td class="py-4 font-medium text-slate-700 dark:text-slate-300 pr-4">{{ item.pessoa }}</td>
+                            <td class="py-4 text-slate-600 dark:text-slate-400 pr-4 flex flex-col gap-0.5">
+                                <span>{{ item.celular }}</span>
+                                <span class="text-indigo-600/70 dark:text-indigo-400/50 text-[10px] uppercase font-bold tracking-wide">Por: {{ item.atendente.username|default:"Sistema" }}</span>
+                            </td>
+                            <td class="py-4 pr-4">
+                                <div class="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300 text-nowrap">
+                                    {% if item.clinica.nome == 'OD' %}
+                                        <div class="w-2 h-2 rounded-full bg-teal-500 dark:bg-teal-400"></div> Odonto
+                                    {% elif item.clinica.nome == 'PS' %}
+                                        <div class="w-2 h-2 rounded-full bg-purple-500 dark:bg-purple-400"></div> Psicologia
+                                    {% elif item.clinica.nome == 'FI' %}
+                                        <div class="w-2 h-2 rounded-full bg-orange-500 dark:bg-orange-400"></div> Fisio
+                                    {% else %}
+                                        <div class="w-2 h-2 rounded-full bg-rose-500 dark:bg-rose-400"></div> Enfermagem
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-4">
+                                {% if item.status == 'AGUARDANDO' %}
+                                    <span class="px-2.5 py-1 bg-orange-100 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 text-xs font-bold rounded-md w-max inline-block tracking-wide">Aguardando</span>
+                                {% elif item.status == 'AGENDADO' %}
+                                    <span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-md w-max inline-block tracking-wide">Agendado</span>
+                                {% else %}
+                                    <span class="px-2.5 py-1 bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 text-xs font-bold rounded-md w-max inline-block tracking-wide">Cancelado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-slate-500 italic">
+                                Nenhuma marcação consta no banco de dados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MARCAÇÕES EM TEMPO REAL ───────────────────────────────────────────── -->
+    <div class="mt-8 mb-8">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="p-2 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl">
+                <i class="ph ph-activity text-xl text-emerald-600 dark:text-emerald-400"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">Atendimentos em Tempo Real</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Status das Marcações agendadas para hoje{% if filtro_clinica %} &mdash; {{ filtro_clinica }}{% endif %}</p>
+            </div>
+            <a href="{% url 'agenda_list' %}" class="ml-auto text-sm text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">Ver agenda completa &rarr;</a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Total -->
+            <div class="bg-white dark:bg-darkcard p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Total Hoje</span>
+                    <div class="p-2 bg-slate-100 dark:bg-slate-700/50 rounded-lg"><i class="ph ph-calendar-blank text-sm text-slate-500 dark:text-slate-400"></i></div>
+                </div>
+                <div class="text-3xl font-bold text-slate-900 dark:text-white">{{ marcacoes_total_hoje|default:"0" }}</div>
+                <p class="text-xs text-slate-400 dark:text-slate-600 mt-1">consultas marcadas</p>
+            </div>
+
+            <!-- Confirmados -->
+            <div class="bg-white dark:bg-darkcard p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Confirmados</span>
+                    <div class="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg"><i class="ph ph-check text-sm text-indigo-500 dark:text-indigo-400"></i></div>
+                </div>
+                <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ marcacoes_confirmadas|default:"0" }}</div>
+                <p class="text-xs text-slate-400 dark:text-slate-600 mt-1">aguardando chegada</p>
+            </div>
+
+            <!-- Em Atendimento -->
+            <div class="bg-white dark:bg-darkcard p-5 rounded-2xl border border-emerald-200 dark:border-emerald-500/20 shadow-sm ring-1 ring-emerald-500/20 dark:ring-emerald-500/10">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">Em Atendimento</span>
+                    <div class="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg"><i class="ph ph-heartbeat text-sm text-emerald-600 dark:text-emerald-400"></i></div>
+                </div>
+                <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ marcacoes_em_atendimento|default:"0" }}</div>
+                <p class="text-xs text-emerald-500/70 dark:text-emerald-600/70 mt-1 font-medium">
+                    {% if marcacoes_em_atendimento > 0 %}● ao vivo agora{% else %}nenhum no momento{% endif %}
+                </p>
+            </div>
+
+            <!-- Aguardando Supervisor -->
+            <div class="bg-white dark:bg-darkcard p-5 rounded-2xl border {% if marcacoes_aguardando_sup > 0 %}border-violet-200 dark:border-violet-500/20{% else %}border-slate-200 dark:border-slate-700/50{% endif %} shadow-sm">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs font-medium {% if marcacoes_aguardando_sup > 0 %}text-violet-600 dark:text-violet-400{% else %}text-slate-500 dark:text-slate-400{% endif %}">Aguard. Supervisor</span>
+                    <div class="p-2 {% if marcacoes_aguardando_sup > 0 %}bg-violet-100 dark:bg-violet-500/20{% else %}bg-slate-100 dark:bg-slate-700/50{% endif %} rounded-lg"><i class="ph ph-user-check text-sm {% if marcacoes_aguardando_sup > 0 %}text-violet-600 dark:text-violet-400{% else %}text-slate-400{% endif %}"></i></div>
+                </div>
+                <div class="text-3xl font-bold {% if marcacoes_aguardando_sup > 0 %}text-violet-600 dark:text-violet-400{% else %}text-slate-900 dark:text-white{% endif %}">{{ marcacoes_aguardando_sup|default:"0" }}</div>
+                <p class="text-xs text-slate-400 dark:text-slate-600 mt-1">pend. de avaliação</p>
+            </div>
+
+            <!-- Concluídos Hoje -->
+            <div class="bg-white dark:bg-darkcard p-5 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Concluídos Hoje</span>
+                    <div class="p-2 bg-sky-50 dark:bg-sky-500/10 rounded-lg"><i class="ph ph-check-circle text-sm text-sky-500 dark:text-sky-400"></i></div>
+                </div>
+                <div class="text-3xl font-bold text-sky-600 dark:text-sky-400">{{ marcacoes_concluidas_hoje|default:"0" }}</div>
+                <p class="text-xs text-slate-400 dark:text-slate-600 mt-1">atendimentos finalizados</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ANÁLISE DE RETENÇÃO ──────────────────────────────────────── -->
+    <div class="mt-8">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                <i class="ph ph-chart-bar text-xl text-indigo-600 dark:text-indigo-400"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">Análise de Retenção e Absenteísmo</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Estatísticas consolidadas de toda a base — independente do filtro de clínica</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+            <!-- CARD 1: Absenteísmo -->
+            <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm">
+                <div class="flex justify-between items-start mb-5">
+                    <div>
+                        <h3 class="font-bold text-slate-900 dark:text-white">Taxa de Faltas</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cancelamentos sobre total de registros</p>
+                    </div>
+                    <div class="p-2.5 bg-rose-50 dark:bg-rose-500/10 rounded-xl">
+                        <i class="ph ph-x-circle text-xl text-rose-500 dark:text-rose-400"></i>
+                    </div>
+                </div>
+
+                <!-- Indicador circular (CSS puro) -->
+                <div class="flex items-center gap-6 mb-5">
+                    <div class="relative w-20 h-20 flex-shrink-0">
+                        <svg class="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-width="3" class="text-slate-100 dark:text-slate-700"/>
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" stroke-width="3"
+                                stroke-dasharray="{{ taxa_cancelamento }} {{ taxa_cancelamento_restante }}"
+                                stroke-linecap="round"
+                                class="text-rose-500 dark:text-rose-400"/>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-base font-bold text-slate-900 dark:text-white">{{ taxa_cancelamento }}%</span>
+                        </div>
+                    </div>
+                    <div class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
+                        <p><span class="font-bold text-rose-600 dark:text-rose-400">{{ total_cancelados_geral }}</span> cancelados</p>
+                        <p><span class="font-bold text-slate-900 dark:text-white">{{ total_geral }}</span> registros total</p>
+                    </div>
+                </div>
+
+                <!-- Top faltas -->
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Top pacientes com mais faltas</p>
+                    {% if top_faltas %}
+                        <ul class="space-y-2">
+                            {% for item in top_faltas %}
+                            <li class="flex items-center justify-between gap-2">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="text-xs font-bold text-slate-400 dark:text-slate-600 w-4">{{ forloop.counter }}</span>
+                                    <span class="text-sm text-slate-700 dark:text-slate-300 truncate font-medium">{{ item.pessoa }}</span>
+                                </div>
+                                <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 flex-shrink-0">
+                                    {{ item.total_faltas }}x
+                                </span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-sm text-slate-400 italic">Nenhum cancelamento registrado.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CARD 2: Tempo Médio na Fila -->
+            <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm">
+                <div class="flex justify-between items-start mb-5">
+                    <div>
+                        <h3 class="font-bold text-slate-900 dark:text-white">Tempo na Fila de Espera</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Do registro até o 1° agendamento</p>
+                    </div>
+                    <div class="p-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-xl">
+                        <i class="ph ph-timer text-xl text-amber-500 dark:text-amber-400"></i>
+                    </div>
+                </div>
+
+                {% if tempo_medio_espera is not None %}
+                <div class="space-y-5">
+                    <!-- Média -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-700">
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Tempo Médio</p>
+                        <div class="flex items-end gap-2">
+                            <span class="text-4xl font-bold text-amber-600 dark:text-amber-400">{{ tempo_medio_espera }}</span>
+                            <span class="text-slate-500 dark:text-slate-400 pb-1 text-sm">dias</span>
+                        </div>
+                        {% if tempo_medio_espera < 1 %}
+                        <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium">✓ Excelente! Menos de 1 dia de espera.</p>
+                        {% elif tempo_medio_espera < 7 %}
+                        <p class="text-xs text-amber-600 dark:text-amber-400 mt-1 font-medium">⚡ Menos de 1 semana de espera.</p>
+                        {% else %}
+                        <p class="text-xs text-rose-600 dark:text-rose-400 mt-1 font-medium">⚠ Mais de 1 semana de espera média.</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Mediana -->
+                    <div class="flex items-center justify-between text-sm border-b border-slate-100 dark:border-slate-700/50 pb-3">
+                        <span class="text-slate-500 dark:text-slate-400">Mediana</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ tempo_mediano_espera }} dias</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-slate-500 dark:text-slate-400">Amostras calculadas</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ total_calculados }}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-600 leading-relaxed">
+                        Calculado sobre agendamentos vinculados à fila de espera com datas de criação registradas.
+                    </p>
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                    <i class="ph ph-clock-countdown text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Dados insuficientes para calcular.</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-600 mt-1">É necessário ter agendamentos vinculados à lista de espera.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- CARD 3: Volume por Clínica (últimos 30 dias) -->
+            <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm">
+                <div class="flex justify-between items-start mb-5">
+                    <div>
+                        <h3 class="font-bold text-slate-900 dark:text-white">Atendimentos por Clínica</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Concluídos nos últimos 30 dias</p>
+                    </div>
+                    <div class="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl">
+                        <i class="ph ph-chart-bar-horizontal text-xl text-emerald-600 dark:text-emerald-400"></i>
+                    </div>
+                </div>
+
+                {% if atendimentos_por_clinica %}
+                <div class="space-y-4">
+                    {% for c in atendimentos_por_clinica %}
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <i class="ph {{ c.icone }} text-sm
+                                    {% if c.cor == 'teal' %}text-teal-500 dark:text-teal-400
+                                    {% elif c.cor == 'purple' %}text-purple-500 dark:text-purple-400
+                                    {% elif c.cor == 'orange' %}text-orange-500 dark:text-orange-400
+                                    {% else %}text-rose-500 dark:text-rose-400{% endif %}"></i>
+                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ c.nome }}</span>
+                                {% if forloop.first %}
+                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 uppercase tracking-wide">Top</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-slate-900 dark:text-white">{{ c.total }}</span>
+                                <span class="text-xs text-slate-400 dark:text-slate-600 ml-1">~{{ c.media_diaria }}/dia</span>
+                            </div>
+                        </div>
+                        <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-700/50 overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-700
+                                {% if c.cor == 'teal' %}bg-teal-500 dark:bg-teal-400
+                                {% elif c.cor == 'purple' %}bg-purple-500 dark:bg-purple-400
+                                {% elif c.cor == 'orange' %}bg-orange-500 dark:bg-orange-400
+                                {% else %}bg-rose-500 dark:bg-rose-400{% endif %}"
+                                style="width: {{ c.pct }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                    <i class="ph ph-chart-bar text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Nenhum atendimento concluído nos últimos 30 dias.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- CARD 4: Nota Média Acadêmica (Mês Atual) -->
+            <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm">
+                <div class="flex justify-between items-start mb-5">
+                    <div>
+                        <h3 class="font-bold text-slate-900 dark:text-white">Nota Média Acadêmica</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Evoluções aprovadas em {{ mes_atual }}</p>
+                    </div>
+                    <div class="p-2.5 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                        <i class="ph ph-graduation-cap text-xl text-indigo-600 dark:text-indigo-400"></i>
+                    </div>
+                </div>
+
+                {% if notas_clinica %}
+                <div class="space-y-4">
+                    {% for c in notas_clinica %}
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <i class="ph {{ c.icone }} text-sm
+                                    {% if c.cor == 'teal' %}text-teal-500 dark:text-teal-400
+                                    {% elif c.cor == 'purple' %}text-purple-500 dark:text-purple-400
+                                    {% elif c.cor == 'orange' %}text-orange-500 dark:text-orange-400
+                                    {% else %}text-rose-500 dark:text-rose-400{% endif %}"></i>
+                                <span class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ c.nome }}</span>
+                                <span class="text-[9px] text-slate-400 dark:text-slate-600">({{ c.total }} aval.)</span>
+                            </div>
+                            <span class="text-sm font-bold
+                                {% if c.media >= 8 %}text-emerald-600 dark:text-emerald-400
+                                {% elif c.media >= 6 %}text-amber-600 dark:text-amber-400
+                                {% else %}text-rose-600 dark:text-rose-400{% endif %}">
+                                {{ c.media }}
+                            </span>
+                        </div>
+                        <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-700/50 overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-700
+                                {% if c.cor == 'teal' %}bg-teal-500 dark:bg-teal-400
+                                {% elif c.cor == 'purple' %}bg-purple-500 dark:bg-purple-400
+                                {% elif c.cor == 'orange' %}bg-orange-500 dark:bg-orange-400
+                                {% else %}bg-rose-500 dark:bg-rose-400{% endif %}"
+                                style="width: {{ c.media|floatformat:0 }}0%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-8 text-center">
+                    <i class="ph ph-star text-4xl text-slate-300 dark:text-slate-600 mb-3"></i>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Nenhuma avaliação aprovada este mês.</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-600 mt-1">As notas aparecerão assim que professores avaliarem evoluções.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div><!-- /grid análise -->
+    </div><!-- /análise retenção -->
+
+</div>
+{% endblock %}

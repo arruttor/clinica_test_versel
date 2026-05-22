@@ -1,0 +1,49 @@
+{% extends 'clinica_core/base.html' %}
+{% block title %}Excluir Clínica{% endblock %}
+{% block page_title %}Excluir Clínica{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block submenu_cadastros %}{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+{% block nav_clinica %}text-indigo-600 dark:text-indigo-400 font-bold{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-xl mx-auto mt-10">
+    <div class="bg-white dark:bg-darkcard rounded-3xl border border-rose-200 dark:border-rose-900/50 p-10 text-center shadow-lg shadow-rose-100 dark:shadow-none">
+
+        <div class="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="ph ph-warning-circle text-4xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Excluir Clínica</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-3">
+            Tem certeza que deseja remover a clínica <strong>{{ clinica.get_nome_display }}</strong>?
+        </p>
+
+        {% with prof_count=clinica.professor_set.count acad_count=clinica.academico_set.count marc_count=clinica.marcacao_set.count %}
+        {% if prof_count or acad_count or marc_count %}
+        <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-500/30 text-left">
+            <p class="text-amber-700 dark:text-amber-400 font-bold text-sm mb-2">
+                <i class="ph ph-warning"></i> Esta clínica possui vínculos:
+            </p>
+            <ul class="text-xs text-amber-600 dark:text-amber-300 space-y-1">
+                {% if prof_count %}<li>• {{ prof_count }} professor(es) vinculado(s)</li>{% endif %}
+                {% if acad_count %}<li>• {{ acad_count }} aluno(s) vinculado(s)</li>{% endif %}
+                {% if marc_count %}<li>• {{ marc_count }} marcação(ões) registrada(s)</li>{% endif %}
+            </ul>
+            <p class="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium">A exclusão pode afetar os dados acima.</p>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="flex flex-col gap-3">
+            {% csrf_token %}
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition shadow-md shadow-rose-200 dark:shadow-rose-900/50 flex items-center justify-center gap-2">
+                <i class="ph ph-trash"></i> Sim, Excluir Clínica
+            </button>
+            <a href="{% url 'clinica_list' %}" class="w-full py-3.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold transition flex items-center justify-center">
+                Cancelar
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Confirmar Agendamento — {{ paciente.nome }}{% endblock %}
+{% block page_title %}Confirmar Agendamento{% endblock %}
+{% block nav_agenda %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-3xl mx-auto w-full">
+
+    {# ── Breadcrumb ── #}
+    <div class="mb-8">
+        <a href="{% url 'agenda_agendar' lista_espera.pk %}"
+           class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+            <i class="ph ph-arrow-left"></i> Voltar para Seleção
+        </a>
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <i class="ph ph-calendar-check text-indigo-500"></i> Confirmar Agendamento
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                    Defina a data, horário e responsável para o atendimento.
+                </p>
+            </div>
+            <div class="flex-shrink-0 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 border border-indigo-200 dark:border-indigo-500/30">
+                <i class="ph ph-hospital"></i>
+                <span>Clínica: <strong>{{ lista_espera.clinica.get_nome_display }}</strong></span>
+            </div>
+        </div>
+    </div>
+
+    {# ── Card do paciente selecionado ── #}
+    <div class="mb-6 p-5 rounded-2xl bg-white dark:bg-darkcard border border-slate-200 dark:border-slate-700/50 shadow-sm flex items-center gap-5">
+        <div class="w-14 h-14 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+            <span class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+                {{ paciente.nome|slice:":2"|upper }}
+            </span>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-lg font-bold text-slate-900 dark:text-white">{{ paciente.nome }}</p>
+                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">
+                    <i class="ph ph-check-circle mr-0.5"></i> Paciente Cadastrado
+                </span>
+            </div>
+            <div class="flex flex-wrap gap-4 mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+                {% if paciente.cpf %}
+                <span><i class="ph ph-identification-card mr-1"></i>{{ paciente.cpf }}</span>
+                {% endif %}
+                {% if paciente.celular %}
+                <span><i class="ph ph-phone mr-1"></i>{{ paciente.celular }}</span>
+                {% endif %}
+                {% if paciente.email %}
+                <span><i class="ph ph-envelope mr-1"></i>{{ paciente.email }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'agenda_agendar' lista_espera.pk %}"
+           class="flex-shrink-0 text-slate-400 hover:text-indigo-500 text-xs font-semibold flex items-center gap-1 transition-colors">
+            <i class="ph ph-arrow-u-up-left"></i> Trocar
+        </a>
+    </div>
+
+    {# ── Formulário de Agendamento ── #}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border-2 border-indigo-200 dark:border-indigo-500/30 p-8 shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-7 pb-4 border-b border-indigo-200 dark:border-indigo-500/30 flex items-center gap-2">
+                <i class="ph ph-clock text-indigo-500 text-xl"></i> Dados do Agendamento
+            </h3>
+
+            <div class="space-y-6">
+                {# Data e Hora #}
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        Data e Hora da Consulta
+                    </label>
+                    {{ form_marcacao.data_hora }}
+                    {% if form_marcacao.data_hora.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.data_hora.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {# Professor / Responsável #}
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        Professor / Responsável
+                    </label>
+                    {{ form_marcacao.professor }}
+                    <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1.5 uppercase tracking-wider">
+                        <i class="ph ph-info"></i> A lista foi filtrada com base nas suas permissões (clínica e perfil de usuário).
+                    </p>
+                    {% if form_marcacao.professor.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.professor.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {# Box / Sala #}
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        <i class="ph ph-door text-sky-500 mr-1"></i> Box / Sala
+                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">(opcional — previne overbooking)</span>
+                    </label>
+                    {{ form_marcacao.box }}
+                    <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1.5 uppercase tracking-wider">
+                        <i class="ph ph-shield-check text-emerald-500"></i> Boxes já ocupados no mesmo horário serão bloqueados automaticamente.
+                    </p>
+                    {% if form_marcacao.box.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.box.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {# Dupla de Alunos (somente Odontologia) #}
+                {% if lista_espera.clinica.nome == 'OD' %}
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        <i class="ph ph-users-three text-teal-500 mr-1"></i> Dupla de Alunos
+                        <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">(opcional &mdash; exclusivo Odontologia)</span>
+                    </label>
+                    {{ form_marcacao.dupla }}
+                    <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1.5 uppercase tracking-wider">
+                        <i class="ph ph-tooth text-teal-500"></i> Selecione a dupla ou equipe responsável pelo atendimento.
+                    </p>
+                    {% if form_marcacao.dupla.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.dupla.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {# Erros gerais do form (ex: overbooking detectado no clean()) #}
+                {% if form_marcacao.non_field_errors %}
+                    <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 text-sm font-medium flex items-start gap-2">
+                        <i class="ph ph-warning-circle text-xl flex-shrink-0 mt-0.5"></i>
+                        <span>{{ form_marcacao.non_field_errors.0 }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-indigo-200 dark:border-indigo-500/30">
+                <button type="submit"
+                        class="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm shadow-md shadow-indigo-200 dark:shadow-indigo-900/50 transition flex items-center justify-center gap-2">
+                    <i class="ph ph-check-fat text-lg"></i> Confirmar e Agendar Consulta
+                </button>
+                <p class="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
+                    <i class="ph ph-arrow-square-out"></i>
+                    Ao confirmar, <strong>{{ paciente.nome }}</strong> será agendado(a) e o item sairá da fila de espera.
+                </p>
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ClínicaEdu{% endblock %}</title>
+    
+    <script>
+        // Prevenir "Flash of Incorrect Theme"
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0F172A',
+                        darkcard: '#1E293B',
+                        primary: '#6366F1',
+                        enfermagem: '#F43F5E',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-slate-50 dark:bg-darkbg text-slate-600 dark:text-slate-300 font-sans h-screen flex overflow-hidden transition-colors duration-300">
+
+    <aside class="w-64 bg-white dark:bg-darkbg border-r border-slate-200 dark:border-slate-700/50 flex flex-col transition-colors duration-300">
+        <div class="p-6 flex items-center gap-3 border-b border-transparent">
+            <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white shadow-md">
+                <i class="ph ph-stethoscope text-xl"></i>
+            </div>
+            <h1 class="text-slate-900 dark:text-white font-bold text-xl tracking-wide">ClínicaEdu</h1>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-8 mt-6">
+            <div>
+                <p class="text-[10px] font-bold text-slate-500 dark:text-slate-500 mb-4 tracking-[0.2em] uppercase px-2">Menu</p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_dashboard %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-indigo-400{% endblock %}">
+                            <i class="ph ph-squares-four text-lg"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'lista_espera_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_lista_espera %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-indigo-400{% endblock %}">
+                            <i class="ph ph-list-numbers text-lg"></i> Lista de Espera 
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'agenda_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_agenda %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-indigo-400{% endblock %}">
+                            <i class="ph ph-calendar-blank text-lg"></i> Agenda
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'aprovacoes_pendentes' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_aprovacoes %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-indigo-400{% endblock %}">
+                            <i class="ph ph-exam text-lg text-amber-500"></i> Supervisão Clínica
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'paciente_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_pacientes %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-indigo-600 dark:hover:text-indigo-400{% endblock %}">
+                            <i class="ph ph-users text-lg"></i> Pacientes
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'estoque_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_estoque %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-amber-600 dark:hover:text-amber-400{% endblock %}">
+                            <i class="ph ph-package text-lg text-amber-500 dark:text-amber-400"></i> Almoxarifado
+                            <span class="ml-auto text-[9px] font-bold px-1.5 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-full uppercase tracking-wide">Novo</span>
+                        </a>
+                    </li>
+                    <li>
+                        <button type="button" onclick="document.getElementById('submenu-cadastros').classList.toggle('hidden'); document.getElementById('caret-cadastros').classList.toggle('rotate-180');" class="flex w-full items-center justify-between px-3 py-2.5 rounded-lg font-medium transition-colors {% block nav_cadastros %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white{% endblock %}">
+                            <div class="flex items-center gap-3">
+                                <i class="ph ph-clipboard-text text-lg"></i> Cadastros
+                            </div>
+                            <i id="caret-cadastros" class="ph ph-caret-down text-sm transition-transform duration-200 {% block caret_cadastros %}{% endblock %}"></i>
+                        </button>
+                        <ul id="submenu-cadastros" class="{% block submenu_cadastros %}hidden{% endblock %} mt-1 space-y-1 pl-4 mx-2">
+
+                            {# Sub-grupo: Odontologia #}
+                            <li>
+                                <button type="button" onclick="document.getElementById('submenu-odonto').classList.toggle('hidden'); document.getElementById('caret-odonto').classList.toggle('rotate-180');" class="flex w-full items-center justify-between pl-3 pr-2 py-2 rounded-lg text-sm font-semibold transition-colors {% block nav_odonto %}text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-teal-600 dark:hover:text-teal-400{% endblock %}">
+                                    <div class="flex items-center gap-2">
+                                        <i class="ph ph-tooth text-teal-500 dark:text-teal-400 text-base"></i> Odontologia
+                                    </div>
+                                    <i id="caret-odonto" class="ph ph-caret-down text-xs transition-transform duration-200 {% block caret_odonto %}{% endblock %}"></i>
+                                </button>
+                                <ul id="submenu-odonto" class="{% block submenu_odonto %}hidden{% endblock %} mt-0.5 space-y-0.5 pl-6 border-l border-slate-200 dark:border-slate-700/50 ml-3">
+                                    <li>
+                                        <a href="{% url 'clinica_odonto_list' %}" class="block py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-medium {% block nav_clinica_odonto %}{% endblock %}">Clínicas de Odonto</a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'dupla_list' %}" class="block py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-medium {% block nav_dupla %}{% endblock %}">Duplas Odonto</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            {# Itens diretos #}
+                            <li>
+                                <a href="{% url 'professor_list' %}" class="block pl-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium {% block nav_professor %}{% endblock %}">Professores</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'academico_list' %}" class="block pl-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium {% block nav_academico %}{% endblock %}">Alunos</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'colaborador_list' %}" class="block pl-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium {% block nav_colaborador %}{% endblock %}">Colaboradores</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'box_list' %}" class="block pl-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors font-medium {% block nav_box %}{% endblock %} flex items-center gap-1.5">
+                                    <i class="ph ph-door text-sky-500 dark:text-sky-400 text-sm"></i> Boxes / Salas
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'clinica_list' %}" class="block pl-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium {% block nav_clinica %}{% endblock %} flex items-center gap-1.5">
+                                    <i class="ph ph-stethoscope text-indigo-500 dark:text-indigo-400 text-sm"></i> Clínicas
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="text-[10px] font-bold text-slate-500 dark:text-slate-500 mb-4 tracking-[0.2em] uppercase px-2">Clínicas</p>
+                <ul class="space-y-1">
+                    <li>
+                        <a href="{% url 'dashboard' %}?clinica=OD"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium
+                                  {% if request.GET.clinica == 'OD' %}bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-teal-700 dark:hover:text-teal-400{% endif %}">
+                            <i class="ph ph-tooth text-teal-500 dark:text-teal-400"></i> Odontologia
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}?clinica=PS"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium
+                                  {% if request.GET.clinica == 'PS' %}bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-purple-700 dark:hover:text-purple-400{% endif %}">
+                            <i class="ph ph-brain text-purple-500 dark:text-purple-400"></i> Psicologia
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}?clinica=FI"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium
+                                  {% if request.GET.clinica == 'FI' %}bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-orange-700 dark:hover:text-orange-400{% endif %}">
+                            <i class="ph ph-activity text-orange-500 dark:text-orange-400"></i> Fisioterapia
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'dashboard' %}?clinica=EN"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium
+                                  {% if request.GET.clinica == 'EN' %}bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400{% else %}text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-rose-700 dark:hover:text-rose-400{% endif %}">
+                            <i class="ph ph-heartbeat text-rose-500 dark:text-rose-400"></i> Enfermagem
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto relative">
+        <header class="h-20 border-b border-slate-200 dark:border-slate-700/50 bg-white dark:bg-darkbg flex items-center justify-between px-8 transition-colors duration-300">
+            <div class="text-sm text-slate-500 dark:text-slate-400">
+                Home <span class="mx-2 text-slate-300 dark:text-slate-600">/</span> <span class="text-slate-900 dark:text-white font-medium">{% block page_title %}Página Inicial{% endblock %}</span>
+            </div>
+            
+            <div class="flex items-center gap-5">
+                <form method="get" action="{% url 'lista_espera_list' %}" class="relative hidden md:block">
+                    <button type="submit" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-indigo-500 transition-colors">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar na lista de espera..." class="bg-slate-100 dark:bg-darkcard border border-transparent dark:border-slate-700 rounded-full py-2 pl-10 pr-4 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 dark:focus:border-indigo-500 text-slate-900 dark:text-white placeholder-slate-500 transition-shadow">
+                </form>
+                
+                <button id="theme-toggle" class="text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-amber-400 transition-colors w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i class="ph ph-sun text-2xl hidden" id="theme-toggle-light-icon"></i>
+                    <i class="ph ph-moon text-2xl hidden" id="theme-toggle-dark-icon"></i>
+                </button>
+                
+                <button class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <i class="ph ph-bell text-xl"></i>
+                </button>
+                
+                <div class="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                
+                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm cursor-help shadow-sm" title="{{ request.user.username }}">
+                    {{ request.user.username|slice:":2"|upper|default:"US" }}
+                </div>
+                
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="text-rose-500 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 transition flex items-center justify-center bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 w-8 h-8 rounded-lg" title="Sair do Sistema">
+                        <i class="ph ph-sign-out text-lg"></i>
+                    </button>
+                </form>
+            </div>
+        </header>
+
+        {% if messages %}
+            <div class="absolute top-4 right-8 z-50 flex flex-col gap-3 max-w-sm w-full">
+            {% for message in messages %}
+                <div class="p-4 rounded-xl shadow-lg border {% if message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400{% elif message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400{% else %}bg-indigo-50 border-indigo-200 text-indigo-800 dark:bg-indigo-500/10 dark:border-indigo-500/20 dark:text-indigo-400{% endif %} flex justify-between items-start transition-all transform animate-fade-in-down" role="alert">
+                    <span class="text-sm font-bold">{{ message }}</span>
+                    <button type="button" onclick="this.parentElement.remove()" class="ml-4 opacity-50 hover:opacity-100 font-bold focus:outline-none">&times;</button>
+                </div>
+            {% endfor %}
+            </div>
+            
+            <style>
+                @keyframes fadeInDown {
+                    from { transform: translateY(-20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                .animate-fade-in-down {
+                    animation: fadeInDown 0.4s ease-out forwards;
+                }
+            </style>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+
+    <script>
+        // Toggle Logic
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+
+        function updateIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+            } else {
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+            }
+        }
+
+        updateIcons();
+
+        themeToggleBtn.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+            
+            updateIcons();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Agendar Atendimento — Selecionar Paciente{% endblock %}
+{% block page_title %}Agendar Atendimento{% endblock %}
+{% block nav_agenda %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-5xl mx-auto w-full">
+
+    {# ── Breadcrumb e cabeçalho ── #}
+    <div class="mb-8">
+        <a href="{% url 'agenda_list' %}"
+           class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+            <i class="ph ph-arrow-left"></i> Voltar para Agenda
+        </a>
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <i class="ph ph-calendar-plus text-indigo-500"></i> Agendar Atendimento
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                    Selecione um paciente já cadastrado ou cadastre um novo para finalizar o agendamento.
+                </p>
+            </div>
+            {# Badge da clínica de destino #}
+            <div class="flex-shrink-0 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 border border-indigo-200 dark:border-indigo-500/30">
+                <i class="ph ph-hospital"></i>
+                <span>Clínica: <strong>{{ lista_espera.clinica.get_nome_display }}</strong></span>
+            </div>
+        </div>
+    </div>
+
+    {# ── Banner do requerente da lista de espera ── #}
+    <div class="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-start gap-3">
+        <i class="ph ph-hourglass-medium text-amber-500 text-xl flex-shrink-0 mt-0.5"></i>
+        <div>
+            <p class="text-sm font-bold text-amber-800 dark:text-amber-300">Requerente na Lista de Espera</p>
+            <p class="text-sm text-amber-700 dark:text-amber-400 mt-0.5">
+                <strong>{{ lista_espera.pessoa }}</strong> — {{ lista_espera.celular }}
+                {% if lista_espera.observacao %}
+                    <span class="ml-2 text-amber-500 dark:text-amber-500">· {{ lista_espera.observacao }}</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {# ── Barra de busca + botão Novo Paciente ── #}
+    <div class="flex flex-col sm:flex-row gap-3 mb-5">
+        <form method="GET" class="flex-1 flex items-center gap-2">
+            <input type="hidden" name="q" id="search-input" value="{{ busca }}">
+            <div class="relative flex-1">
+                <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input id="busca-live"
+                       type="text"
+                       value="{{ busca }}"
+                       placeholder="Buscar por nome, CPF ou celular…"
+                       class="w-full bg-white dark:bg-darkcard border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition">
+            </div>
+        </form>
+        <a href="{% url 'agenda_agendar_novo' lista_espera.pk %}"
+           class="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm rounded-xl shadow-md shadow-indigo-200 dark:shadow-indigo-900/50 transition-all whitespace-nowrap">
+            <i class="ph ph-user-plus text-lg"></i> + Novo Paciente
+        </a>
+    </div>
+
+    {# ── Tabela de Pacientes ── #}
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm">
+
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                <i class="ph ph-users text-indigo-400 mr-1"></i>
+                <span id="count-label">{{ pacientes|length }}</span> paciente{{ pacientes|length|pluralize }} encontrado{{ pacientes|length|pluralize }}
+            </p>
+            {% if busca %}
+            <a href="{% url 'agenda_agendar' lista_espera.pk %}" class="text-xs text-indigo-500 hover:text-indigo-700 font-medium flex items-center gap-1">
+                <i class="ph ph-x-circle"></i> Limpar filtro
+            </a>
+            {% endif %}
+        </div>
+
+        <div id="patient-table" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/40">
+                        <th class="px-6 py-3">Nome Completo</th>
+                        <th class="px-6 py-3">CPF</th>
+                        <th class="px-6 py-3">Celular</th>
+                        <th class="px-6 py-3 text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="patient-tbody" class="text-sm divide-y divide-slate-100 dark:divide-slate-700/30">
+                    {% for p in pacientes %}
+                        {% url 'agenda_agendar_existente' lista_espera.pk p.pk as target_url %}
+                        <tr class="patient-row hover:bg-indigo-50/60 dark:hover:bg-indigo-500/5 transition-colors cursor-pointer group"
+                            data-nome="{{ p.nome|lower }}"
+                            data-cpf="{{ p.cpf|default:'' }}"
+                            data-celular="{{ p.celular|default:'' }}"
+                            onclick="window.location.href='{{ target_url }}';">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                                        {{ p.nome|slice:":2"|upper }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors">{{ p.nome }}</p>
+                                    {% if p.data_nascimento %}
+                                    <p class="text-xs text-slate-400 dark:text-slate-500">Nasc: {{ p.data_nascimento|date:"d/m/Y" }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if p.cpf %}
+                                <span class="font-mono text-slate-600 dark:text-slate-300">{{ p.cpf }}</span>
+                            {% else %}
+                                <span class="text-slate-300 dark:text-slate-600 italic text-xs">Não informado</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-300">
+                            {% if p.celular %}{{ p.celular }}{% else %}<span class="text-slate-300 dark:text-slate-600 italic text-xs">—</span>{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{{ target_url }}"
+                               onclick="event.stopPropagation()"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-xs rounded-lg shadow-sm shadow-indigo-200 dark:shadow-indigo-900/50 transition opacity-0 group-hover:opacity-100">
+                                <i class="ph ph-calendar-check"></i> Selecionar
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="empty-row">
+                        <td colspan="4" class="px-6 py-16 text-center text-slate-400 dark:text-slate-500">
+                            <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ph ph-user-circle-dashed text-3xl text-slate-300 dark:text-slate-600"></i>
+                            </div>
+                            <p class="font-bold text-slate-600 dark:text-slate-400 mb-1">Nenhum paciente encontrado</p>
+                            <p class="text-sm">Tente outro termo ou <a href="{% url 'agenda_agendar_novo' lista_espera.pk %}" class="text-indigo-500 hover:underline font-semibold">cadastre um novo paciente</a>.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Empty state para busca local que zera a lista #}
+        <div id="local-empty" class="hidden px-6 py-16 text-center text-slate-400 dark:text-slate-500">
+            <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-magnifying-glass text-3xl text-slate-300 dark:text-slate-600"></i>
+            </div>
+            <p class="font-bold text-slate-600 dark:text-slate-400 mb-1">Nenhum resultado</p>
+            <p class="text-sm">Não encontramos pacientes com esse termo. <a href="{% url 'agenda_agendar_novo' lista_espera.pk %}" class="text-indigo-500 hover:underline font-semibold">Cadastrar como novo?</a></p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+// Busca local em tempo real (filtra a tabela sem recarregar)
+const searchInput = document.getElementById('busca-live');
+const rows        = document.querySelectorAll('.patient-row');
+const localEmpty  = document.getElementById('local-empty');
+const countLabel  = document.getElementById('count-label');
+const tableBody   = document.getElementById('patient-tbody');
+
+searchInput.addEventListener('input', function () {
+    const term = this.value.toLowerCase().trim();
+    let visible = 0;
+
+    rows.forEach(row => {
+        const nome    = row.dataset.nome    || '';
+        const cpf     = row.dataset.cpf     || '';
+        const celular = row.dataset.celular || '';
+        const match   = !term || nome.includes(term) || cpf.includes(term) || celular.includes(term);
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+
+    countLabel.textContent = visible;
+    localEmpty.classList.toggle('hidden', visible > 0);
+    tableBody.classList.toggle('hidden', visible === 0);
+});
+</script>
+{% endblock %}

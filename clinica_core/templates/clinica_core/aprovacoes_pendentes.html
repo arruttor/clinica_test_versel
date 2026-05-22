@@ -1,0 +1,99 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - Aprovações Pendentes{% endblock %}
+{% block page_title %}Área do Docente: Aprovações Pendentes{% endblock %}
+
+{% block content %}
+<div class="p-8">
+    
+    <div class="flex flex-col mb-8 gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <i class="ph ph-folder-notch-open text-indigo-500"></i> Supervisão de Prontuários
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gerenciamento das evoluções clínicas registradas por alunos.</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-wrap gap-2 mt-2">
+            <a href="?status=AGUARDANDO" class="px-4 py-2 rounded-lg text-sm font-bold transition-colors {% if status_filter == 'AGUARDANDO' %}bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 shadow-sm{% else %}bg-white dark:bg-darkcard text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50{% endif %}">
+                Aguardando Correção
+            </a>
+            <a href="?status=APROVADO" class="px-4 py-2 rounded-lg text-sm font-bold transition-colors {% if status_filter == 'APROVADO' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 shadow-sm{% else %}bg-white dark:bg-darkcard text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50{% endif %}">
+                Já Avaliados (Aprovados)
+            </a>
+            <a href="?status=TODAS" class="px-4 py-2 rounded-lg text-sm font-bold transition-colors {% if status_filter == 'TODAS' %}bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400 shadow-sm{% else %}bg-white dark:bg-darkcard text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50{% endif %}">
+                Todas as Evoluções
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm transition-colors duration-300">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-max">
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <th class="px-6 py-4">Data Registro</th>
+                        <th class="px-6 py-4">Paciente</th>
+                        <th class="px-6 py-4">Acadêmico / Autor</th>
+                        <th class="px-6 py-4">Evolução Resumida</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for item in evolucoes %}
+                    <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
+                            {{ item.date_create|date:"d/m/Y - H:i" }}
+                        </td>
+                        <td class="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">
+                            {{ item.paciente.nome }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-xs font-bold">
+                                    {{ item.user_create.username|slice:":1"|upper|default:"U" }}
+                                </div>
+                                {{ item.user_create.get_full_name|default:item.user_create.username }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 w-1/3 truncate max-w-xs" title="{{ item.descricao }}">
+                            {{ item.descricao|truncatechars:50 }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if item.status == 'AGUARDANDO' %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-[10px] rounded-full tracking-wide uppercase border border-amber-200 dark:border-amber-500/20 shadow-sm animate-pulse">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pendente
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] rounded-full tracking-wide uppercase border border-emerald-200 dark:border-emerald-500/20 shadow-sm">
+                                <i class="ph ph-check-circle text-xs"></i> Aprovado
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'evolucao_aprovar' item.pk %}" class="px-4 py-2 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 font-bold text-xs inline-flex items-center gap-2 transition">
+                                {% if item.status == 'AGUARDANDO' %}<i class="ph ph-exam"></i> Avaliar{% else %}<i class="ph ph-eye"></i> Visualizar{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-16 text-center text-slate-500 dark:text-slate-500">
+                            <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700/50 shadow-sm">
+                                <i class="ph ph-check-circle text-4xl text-emerald-500"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-1">Sem resultados</h3>
+                            <p>Não há nenhuma evolução para a filtro atual ({{ status_filter }}).</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

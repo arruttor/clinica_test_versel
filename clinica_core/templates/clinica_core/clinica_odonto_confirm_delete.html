@@ -1,0 +1,33 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - Excluir Clínica{% endblock %}
+{% block page_title %}Excluir Clínica Odonto{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block submenu_cadastros %}{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-xl mx-auto w-full mt-10">
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-rose-200 dark:border-rose-900/50 p-8 shadow-xl shadow-rose-100 dark:shadow-none text-center">
+        
+        <div class="w-16 h-16 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-6">
+            <i class="ph ph-warning-circle text-3xl"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Confirmar Exclusão</h2>
+        <p class="text-slate-600 dark:text-slate-400 mb-6">
+            Tem certeza que deseja excluir a clínica de odonto <strong>"{{ clinica.nome }}"</strong>? Esta ação não pode ser desfeita.
+        </p>
+
+        <form method="post" class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'clinica_odonto_list' %}" class="px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-sm transition order-2 sm:order-1">
+                Cancelar
+            </a>
+            <button type="submit" class="px-6 py-3 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm transition shadow-md shadow-rose-200 dark:shadow-rose-900/50 order-1 sm:order-2 flex items-center justify-center gap-2">
+                <i class="ph ph-trash text-lg"></i> Sim, Excluir
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

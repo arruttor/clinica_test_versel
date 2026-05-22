@@ -1,0 +1,122 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - {{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-4xl mx-auto w-full">
+    
+    <div class="mb-8">
+        <a href="{% url 'paciente_list' %}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+            <i class="ph ph-arrow-left"></i> Voltar para Lista
+        </a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ titulo }}</h2>
+        <div class="flex items-center gap-3 mt-2">
+            <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <i class="ph ph-user text-xl"></i>
+            </div>
+            <div>
+                <p class="text-slate-900 dark:text-white font-medium">{{ paciente.nome }}</p>
+                <p class="text-slate-500 dark:text-slate-400 text-xs">CPF: {{ paciente.cpf|default:"Não informado" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 sm:p-8 shadow-sm transition-colors duration-300">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            {% if anamneses_existentes %}
+            <div class="mb-6 flex gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-700/50">
+                {% for a in anamneses_existentes %}
+                <a href="?id={{ a.id }}" class="px-4 py-2 rounded-t-lg text-sm font-bold {% if anamnese_atual and anamnese_atual.id == a.id %}bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border-b-2 border-indigo-600{% else %}bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %} whitespace-nowrap transition">
+                    <i class="ph ph-buildings"></i> {{ a.clinica.get_nome_display|default:"Geral" }}
+                </a>
+                {% endfor %}
+                <a href="?" class="px-4 py-2 rounded-t-lg text-sm font-bold {% if not anamnese_atual or not anamnese_atual.id %}bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-b-2 border-emerald-600{% else %}bg-transparent text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800{% endif %} whitespace-nowrap transition">
+                    <i class="ph ph-plus"></i> Nova Clínica
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Dados Clínicos Principais -->
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2">Investigação Clínica</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if 'clinica' in form.fields %}
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Clínica Referência</label>
+                        {{ form.clinica }}
+                        {% if form.clinica.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.clinica.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.queixa_principal.id_for_label }}">Queixa Principal</label>
+                        {{ form.queixa_principal }}
+                        {% if form.queixa_principal.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.queixa_principal.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.historico_medico.id_for_label }}">Histórico Médico e Familiar</label>
+                        {{ form.historico_medico }}
+                        {% if form.historico_medico.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.historico_medico.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dados Complementares -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2">Sinais e Condições</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.pressao_arterial.id_for_label }}">Pressão Arterial</label>
+                        {{ form.pressao_arterial }}
+                        {% if form.pressao_arterial.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.pressao_arterial.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.alergias.id_for_label }}">Alergias (Medicamentos, Alimentos, etc.)</label>
+                        {{ form.alergias }}
+                        {% if form.alergias.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.alergias.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.medicamentos_em_uso.id_for_label }}">Medicamentos em Uso Comum</label>
+                        {{ form.medicamentos_em_uso }}
+                        {% if form.medicamentos_em_uso.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.medicamentos_em_uso.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-700/50 flex justify-end gap-4 mt-8">
+                <a href="{% url 'paciente_list' %}" class="px-6 py-3 rounded-lg font-bold text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">
+                    <i class="ph ph-heartbeat text-lg"></i> {{ btn_texto }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

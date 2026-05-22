@@ -1,0 +1,297 @@
+# A FAZER
+
+
+
+
+
+### -------------------------------------------------------------------- ###
+### 1. FEITO: Prontuário Eletrônico do Paciente (PEP) integrado
+Criar o "coração" da parte clínica:
+- FEITO: Uma tela onde os alunos registram a evolução diária do paciente ("o que foi feito no dia").
+- FEITO: Controle de **Anamnese** (ex: formulários de histórico médico, alergias, pressão arterial).
+- FEITO: Upload de arquivos: permitir anexar fotos, radiografias (muito útil na Odonto), encaminhamentos ou exames laboratoriais.
+
+### 2. FEITO: Módulo de Supervisão Docente (Aprovação Múltipla)
+Diferente de uma clínica comum, clínicas acadêmicas precisam que **Professores aprovem o que o aluno faz**.
+- **Assinatura Eletrônica:** O aluno finaliza o atendimento/prontuário, e ele fica travado como "Aguardando Supervisor".
+- Login do Professor para ler o prontuário preenchido pelo aluno, colocar uma nota/avaliação de desempenho dele e então "liberar" a evolução para o histórico oficial.
+
+### 3. FEITO: Calendário Interativo (A Agenda)
+Temos no seu menu esquedo a opção "Agenda" sem link ainda.
+- Implementar um painel de calendário visual onde a secretária consegue ver a semana inteira.
+- Ferramenta de arrastar e soltar pacientes, visualizando a ocupação diária de cada curso (Odonto, Psico, Fisio, Enfermagem).
+
+### 4. FEITO: Controle Físico de Salas / Equipamentos (Boxes)
+Você organizou as clínicas, mas clínicas dependem de estrutura física.
+- Na hora de agendar, validar se a cadeira de odontologia (Box 01) ou a maca de Fisio já não está ocupada naquele mesmo horário por outro aluno. É ótimo para evitar *overbooking*.
+
+### 5. Triagem e Serviço Social
+Em clínicas comunitárias/escola, muitas vezes há uma primeira entrevista para verificação de perfil socioeconômico e necessidades prioritárias:
+- Cadastro socioeconômico (renda, moradia) na ficha do paciente.
+- Tela de "Nova Triagem", que depois da entrevista joga a pessoa na respectiva *Lista de Espera* de um curso específico com uma cor/tag de gravidade do quadro dela.
+
+### 6. FEITO: Controle de Estoque (Almoxarifado)
+Principalmente para Enfermaria e Odontologia:
+- Um pequeno módulo para as funcionárias controlarem a entrada e saída de insumos caros ou de alto giro (ex: anestésicos, caixas de luvas, resinas, agulhas). 
+
+### 7. FEITO: Dashboard de Retenção e Faltas (Absenteísmo)
+Podemos evoluir aquela tela inicial (Dashboard) para incluir estatísticas essenciais:
+- Relatório de taxa de faltas por paciente.
+- Tempos médios: quanto tempo a pessoa levou entre a "Lista de Espera" e o de fato seu primeiro "Agendamento".
+- Qual clínica (Odonto, Psico, etc.) atende mais por dia?
+
+---
+Alguma dessas opções te chama mais atenção para ser a nossa próxima prioridade de trabalho? Se você preferir, eu posso construir um calendário e a tela de **Prontuário** de evolução, que costumam ser a alma do dia a dia dos alunos!
+------------
+# 📊 Relatórios, Consultas e Dashboards — Clínica Escola UNA
+
+Mapeamento completo baseado nos modelos existentes:
+`Clinica`, `Academico`, `Professor`, `Colaborador`, `Paciente`, `Box`, `Marcacao`, `ListaEspera`, `ClinicaOdonto`, `DuplaOdonto`, `Anamnese`, `Evolucao`, `LogAlteracaoEvolucao`, `ItemEstoque`, `MovimentacaoEstoque`.
+
+---
+
+## 🟢 Módulo 1 — Dashboard Principal (Tela Inicial)
+
+Painel executivo em tempo real. Público-alvo: **Administradores e Coordenadores**.
+
+| Card / Gráfico | Dados | Tipo |
+|---|---|---|
+| Total de pacientes cadastrados | `Paciente.count()` | KPI Card |
+| Atendimentos hoje | `Marcacao` com `data_hora__date=hoje` | KPI Card |
+| Em atendimento agora | `Marcacao.status = EM_ATENDIMENTO` | KPI Card |
+| Aguardando supervisor | `Evolucao.status = AGUARDANDO` | KPI Card (alerta) |
+| Itens com estoque baixo | `ItemEstoque.estoque_baixo = True` | KPI Card (alerta) |
+| Atendimentos por clínica — semana atual | `Marcacao GROUP BY clinica` | Gráfico de barras |
+| Status da fila de espera | `ListaEspera GROUP BY status` | Gráfico de pizza / donut |
+| Ocupação dos boxes hoje | `Box` vs `Marcacao` por horário | Heatmap / grade |
+
+---
+
+## 🔵 Módulo 2 — Relatórios de Atendimento (Agenda/Marcações)
+
+Público-alvo: **Secretaria, Professores, Administradores**.
+
+### 2.1 Relatório de Atendimentos por Período
+Filtros: clínica, status, período de datas, acadêmico, professor.
+
+| Coluna | Campo |
+|---|---|
+| Data/Hora | `Marcacao.data_hora` |
+| Paciente | `Marcacao.paciente.nome` |
+| Clínica | `Marcacao.clinica` |
+| Acadêmico | `Marcacao.academico.nome` |
+| Professor | `Marcacao.professor.nome` |
+| Box/Sala | `Marcacao.box.nome` |
+| Status | `Marcacao.status` |
+| Finalizado em | `Marcacao.data_hora_finalizacao` |
+
+> [!TIP]
+> Exportável para **Excel/CSV** e **PDF** com cabeçalho e logo da clínica.
+
+---
+
+### 2.2 Relatório de Absenteísmo (Taxa de Faltas)
+Identifica pacientes que frequentemente faltam.
+
+```
+Taxa de Falta = (agendamentos sem finalização / total de agendamentos) × 100
+```
+
+| Coluna | Origem |
+|---|---|
+| Paciente | `Paciente.nome` |
+| Total agendado | `Marcacao.count()` |
+| Total concluído | `Marcacao.status = CONCLUIDO` |
+| Taxa de comparecimento % | Calculado |
+
+---
+
+### 2.3 Relatório de Tempo de Espera (Lista de Espera → 1º Atendimento)
+Mede a eficiência do fluxo de triagem para agendamento.
+
+```
+Tempo de Espera = Marcacao.data_hora - ListaEspera.data_hora_marcacao
+```
+
+Filtros: clínica, período, faixa de dias de espera.
+
+---
+
+### 2.4 Relatório de Ocupação de Boxes
+Mostra o aproveitamento dos recursos físicos.
+
+| Coluna | Origem |
+|---|---|
+| Box / Sala | `Box.nome` |
+| Clínica | `Box.clinica` |
+| Total de agendamentos | `Marcacao` vinculadas ao box |
+| Horário de pico | Horário com mais marcações |
+| Taxa de ociosidade % | Calculado vs capacidade diária |
+
+---
+
+## 🟣 Módulo 3 — Relatórios Acadêmicos (Desempenho de Alunos)
+
+Público-alvo: **Professores, Coordenadores**.
+
+### 3.1 Produção Acadêmica por Aluno
+Quantos atendimentos, evoluções e aprovações cada acadêmico gerou.
+
+| Coluna | Origem |
+|---|---|
+| Acadêmico | `Academico.nome` |
+| Clínica | `Academico.clinica` |
+| Atendimentos realizados | `Marcacao` vinculadas |
+| Evoluções registradas | `Evolucao` criadas pelo aluno |
+| Evoluções aprovadas | `Evolucao.status = APROVADO` |
+| Nota média | `Evolucao.nota` média |
+
+---
+
+### 3.2 Relatório de Evoluções por Status de Aprovação
+Lista todas as evoluções com filtro por status (Aguardando / Aprovado).
+
+| Coluna | Origem |
+|---|---|
+| Paciente | `Evolucao.paciente.nome` |
+| Acadêmico (criador) | `Evolucao.user_create` |
+| Professor avaliador | `Evolucao.avaliador.nome` |
+| Status | `Evolucao.status` |
+| Nota | `Evolucao.nota` |
+| Data criação | `Evolucao.date_create` |
+| Data aprovação | `Evolucao.date_alter` |
+
+---
+
+### 3.3 Relatório de Desempenho do Professor (Supervisão)
+Métricas sobre a atividade de supervisão dos professores.
+
+| Métrica | Cálculo |
+|---|---|
+| Total de evoluções avaliadas | `Evolucao.avaliador = Professor` |
+| Nota média atribuída | `AVG(Evolucao.nota)` |
+| Tempo médio para aprovar | `Evolucao.date_alter - Evolucao.date_create` |
+| Alterações de avaliação | `LogAlteracaoEvolucao` |
+
+---
+
+### 3.4 Log de Alterações de Avaliação
+Auditoria completa para coordenação pedagógica.
+
+| Coluna | Origem |
+|---|---|
+| Evolução | `LogAlteracaoEvolucao.evolucao` |
+| Professor | `LogAlteracaoEvolucao.professor.nome` |
+| Nota anterior → Nova | `nota_anterior` / `nota_nova` |
+| Observação anterior → Nova | Texto comparativo |
+| Data da alteração | `LogAlteracaoEvolucao.data_alteracao` |
+
+---
+
+## 🟡 Módulo 4 — Relatórios de Pacientes
+
+Público-alvo: **Secretaria, Administração**.
+
+### 4.1 Ficha Completa do Paciente (Prontuário em PDF)
+Documento unificado por paciente contendo:
+- Dados cadastrais (`Paciente`)
+- Anamnese por clínica (`Anamnese`)
+- Histórico de atendimentos (`Marcacao`)
+- Evoluções clínicas aprovadas (`Evolucao.status = APROVADO`)
+- Documentos anexados (`DocumentoPaciente`)
+
+---
+
+### 4.2 Relatório de Pacientes por Clínica
+Filtros: clínica, período de cadastro, status na lista de espera.
+
+---
+
+### 4.3 Pacientes sem Atendimento Recente
+Detecta pacientes inativos (ex.: sem marcação nos últimos 90 dias).
+
+```
+Última marcação = Marcacao.filter(paciente=p).order_by('-data_hora').first()
+```
+
+---
+
+## 🟠 Módulo 5 — Relatórios de Estoque (Almoxarifado)
+
+Público-alvo: **Colaboradores, Coordenadores**.
+
+### 5.1 Posição de Estoque Atual
+| Coluna | Origem |
+|---|---|
+| Item | `ItemEstoque.nome` |
+| Código | `ItemEstoque.codigo` |
+| Unidade | `ItemEstoque.unidade` |
+| Estoque Mínimo | `ItemEstoque.estoque_minimo` |
+| Estoque Atual | `ItemEstoque.estoque_atual` |
+| Status | 🔴 Crítico / 🟡 Baixo / 🟢 OK |
+| Clínica | `ItemEstoque.clinica` |
+
+---
+
+### 5.2 Histórico de Movimentações por Item
+Rastreio completo de entradas e saídas.
+
+Filtros: item, tipo (entrada/saída), período, responsável.
+
+---
+
+### 5.3 Consumo Mensal por Clínica
+Quanto cada clínica consumiu de insumos no período.
+
+```
+Consumo = SUM(MovimentacaoEstoque.quantidade WHERE tipo='SAIDA' GROUP BY clinica, mes)
+```
+
+---
+
+### 5.4 Alertas de Estoque Crítico
+Lista dos itens abaixo do estoque mínimo com:
+- Item, clínica, unidade
+- Estoque mínimo vs. estoque atual
+- Sugestão de quantidade de reposição
+
+---
+
+## 🔴 Módulo 6 — Relatório Gerencial Consolidado (Visão Estratégica)
+
+Público-alvo: **Coordenação / Direção**.
+
+### 6.1 Dashboard Estratégico
+| Indicador | Cálculo |
+|---|---|
+| Atendimentos por mês (série histórica) | `Marcacao GROUP BY mes` |
+| Crescimento da base de pacientes | `Paciente GROUP BY mes_cadastro` |
+| Taxa de conclusão de atendimentos | `CONCLUIDO / total × 100` |
+| Taxa de aprovação de evoluções | `APROVADO / total × 100` |
+| Nota média acadêmica | `AVG(Evolucao.nota) por período` |
+| Tempo médio na lista de espera | Em dias |
+
+---
+
+### 6.2 Relatório de Produtividade por Clínica (Comparativo)
+Gráfico de barras lado a lado comparando Odontologia, Psicologia, Fisioterapia e Enfermagem em:
+- Volume de atendimentos
+- Nota média dos acadêmicos
+- Taxa de faltas dos pacientes
+
+---
+
+## 🧩 Sugestão de Implementação — Ordem de Prioridade
+
+| Prioridade | Relatório | Complexidade | Impacto |
+|---|---|---|---|
+| 1 | Dashboard Principal (aprimorado) | Média | 🔥 Alto |
+| 2 | Atendimentos por Período + Export CSV | Baixa | 🔥 Alto |
+| 3 | Posição de Estoque + Alertas | Baixa | Alto |
+| 4 | Produção Acadêmica por Aluno | Média | Alto |
+| 5 | Ficha/Prontuário do Paciente em PDF | Média | Alto |
+| 6 | Tempo de Espera (Lista → Agendamento) | Média | Médio |
+| 7 | Absenteísmo (Taxa de Faltas) | Média | Médio |
+| 8 | Consumo Mensal por Clínica (Estoque) | Média | Médio |
+| 9 | Dashboard Estratégico / Gerencial | Alta | Alto (para gestores) |
+| 10 | Log de Auditoria de Avaliações | Baixa | Médio |

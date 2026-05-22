@@ -1,0 +1,88 @@
+{% extends 'clinica_core/base.html' %}
+{% block title %}{{ titulo }} — Almoxarifado{% endblock %}
+{% block page_title %}Almoxarifado{% endblock %}
+{% block nav_estoque %}bg-slate-100 dark:bg-slate-800/80 text-amber-600 dark:text-amber-400{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-2xl mx-auto">
+
+    <div class="mb-8">
+        <a href="{% url 'estoque_list' %}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition mb-3">
+            <i class="ph ph-arrow-left"></i> Voltar ao Almoxarifado
+        </a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ titulo }}</h2>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm p-8">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="mb-6 p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-rose-700 dark:text-rose-400 text-sm">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="space-y-5">
+                <!-- Nome -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nome do Item <span class="text-rose-500">*</span></label>
+                    {{ form.nome }}
+                    {% if form.nome.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.nome.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Código + Unidade -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Código / SKU</label>
+                        {{ form.codigo }}
+                        {% if form.codigo.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.codigo.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Unidade de Medida <span class="text-rose-500">*</span></label>
+                        {{ form.unidade }}
+                        {% if form.unidade.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.unidade.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Clínica -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Clínica <span class="text-xs text-slate-400 font-normal">(opcional — deixe em branco para item geral)</span></label>
+                    {{ form.clinica }}
+                    {% if form.clinica.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.clinica.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Estoque mínimo -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Estoque Mínimo (alerta)</label>
+                    {{ form.estoque_minimo }}
+                    <p class="text-xs text-slate-400 mt-1">Quando o estoque atingir este valor, um alerta será exibido na lista.</p>
+                    {% if form.estoque_minimo.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.estoque_minimo.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Descrição -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Descrição / Observações</label>
+                    {{ form.descricao }}
+                    {% if form.descricao.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.descricao.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Ativo -->
+                <div class="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
+                    {{ form.ativo }}
+                    <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Item Ativo (visível na lista)</label>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition-all hover:scale-[1.02] shadow-sm">
+                    {{ btn_texto }}
+                </button>
+                <a href="{% url 'estoque_list' %}" class="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl transition text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

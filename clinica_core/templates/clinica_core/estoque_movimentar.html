@@ -1,0 +1,92 @@
+{% extends 'clinica_core/base.html' %}
+{% block title %}Registrar Movimentação — {{ item.nome }}{% endblock %}
+{% block page_title %}Almoxarifado{% endblock %}
+{% block nav_estoque %}bg-slate-100 dark:bg-slate-800/80 text-amber-600 dark:text-amber-400{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-lg mx-auto">
+
+    <div class="mb-8">
+        <a href="{% url 'estoque_list' %}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition mb-3">
+            <i class="ph ph-arrow-left"></i> Voltar ao Almoxarifado
+        </a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Registrar Movimentação</h2>
+    </div>
+
+    <!-- Card info do item -->
+    <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-5 mb-6 flex items-center gap-4">
+        <div class="p-3 bg-amber-100 dark:bg-amber-500/20 rounded-xl">
+            <i class="ph ph-package text-2xl text-amber-600 dark:text-amber-400"></i>
+        </div>
+        <div>
+            <p class="font-bold text-slate-900 dark:text-white text-lg">{{ item.nome }}</p>
+            <div class="flex items-center gap-4 mt-1">
+                <span class="text-sm text-slate-600 dark:text-slate-400">Estoque atual:
+                    <strong class="{% if item.estoque_baixo %}text-rose-600 dark:text-rose-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">
+                        {{ item.estoque_atual }} {{ item.unidade }}
+                    </strong>
+                </span>
+                <span class="text-sm text-slate-500 dark:text-slate-500">Mínimo: {{ item.estoque_minimo }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm p-8">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="mb-6 p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl text-rose-700 dark:text-rose-400 text-sm font-medium">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="space-y-5">
+                <!-- Tipo -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tipo <span class="text-rose-500">*</span></label>
+                    {{ form.tipo }}
+                    {% if form.tipo.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.tipo.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Quantidade -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Quantidade <span class="text-rose-500">*</span></label>
+                    {{ form.quantidade }}
+                    {% if form.quantidade.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.quantidade.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Data -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Data <span class="text-rose-500">*</span></label>
+                    {{ form.data }}
+                    {% if form.data.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.data.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Motivo -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Motivo / Referência</label>
+                    {{ form.motivo }}
+                    {% if form.motivo.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.motivo.errors.0 }}</p>{% endif %}
+                </div>
+
+                <!-- Observação -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Observação</label>
+                    {{ form.observacao }}
+                    {% if form.observacao.errors %}<p class="text-rose-500 text-xs mt-1">{{ form.observacao.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl transition-all hover:scale-[1.02] shadow-sm">
+                    <i class="ph ph-arrows-left-right mr-1"></i> Registrar Movimentação
+                </button>
+                <a href="{% url 'estoque_list' %}" class="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-semibold rounded-xl transition text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

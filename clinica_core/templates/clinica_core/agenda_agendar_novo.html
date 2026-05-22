@@ -1,0 +1,287 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Novo Paciente e Agendamento{% endblock %}
+{% block page_title %}Novo Paciente e Agendamento{% endblock %}
+{% block nav_agenda %}bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-6xl mx-auto w-full">
+
+    {# ── Breadcrumb e cabeçalho ── #}
+    <div class="mb-8">
+        <a href="{% url 'agenda_agendar' lista_espera.pk %}"
+           class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+            <i class="ph ph-arrow-left"></i> Voltar para Seleção
+        </a>
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                    <i class="ph ph-user-plus text-indigo-500"></i> Cadastrar Novo Paciente e Agendar
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                    Preencha os dados do requerente para cadastrá-lo e finalizar o agendamento.
+                </p>
+            </div>
+            <div class="flex-shrink-0 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-4 py-2 rounded-xl font-medium text-sm flex items-center gap-2 border border-indigo-200 dark:border-indigo-500/30">
+                <i class="ph ph-hospital"></i>
+                <span>Clínica: <strong>{{ lista_espera.clinica.get_nome_display }}</strong></span>
+            </div>
+        </div>
+    </div>
+
+    {# ── Aviso de dados pré-importados ── #}
+    <div class="mb-6 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 flex items-start gap-3">
+        <i class="ph ph-info text-indigo-500 text-xl flex-shrink-0 mt-0.5"></i>
+        <p class="text-sm text-indigo-700 dark:text-indigo-300">
+            Os dados abaixo foram pré-preenchidos com as informações da lista de espera.
+            O CPF informado deve ser único no sistema. Caso o paciente já possua cadastro, selecione-o na tela anterior.
+        </p>
+    </div>
+
+    {# ── Formulário Duplo ── #}
+    <form method="POST" class="flex flex-col lg:flex-row gap-8 items-start">
+        {% csrf_token %}
+
+        {# Coluna Esquerda: Dados do Paciente #}
+        <div class="w-full lg:w-2/3 bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-8 shadow-sm">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 pb-4 border-b border-slate-200 dark:border-slate-700/50 flex items-center gap-2">
+                <i class="ph ph-user text-indigo-500 text-xl"></i> Cadastro do Paciente
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nome Completo <span class="text-rose-500">*</span></label>
+                    {{ form_paciente.nome }}
+                    {% if form_paciente.nome.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.nome.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                        CPF <span class="text-xs text-slate-400 font-normal">(identificador chave)</span>
+                    </label>
+                    {{ form_paciente.cpf }}
+                    {% if form_paciente.cpf.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.cpf.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Data de Nascimento</label>
+                    {{ form_paciente.data_nascimento }}
+                    {% if form_paciente.data_nascimento.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.data_nascimento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Celular</label>
+                    {{ form_paciente.celular }}
+                    {% if form_paciente.celular.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.celular.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">E-mail</label>
+                    {{ form_paciente.email }}
+                    {% if form_paciente.email.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Endereço Residencial</label>
+                    {{ form_paciente.endereco }}
+                    {% if form_paciente.endereco.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.endereco.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Observações / Motivo</label>
+                    {{ form_paciente.observacao }}
+                    {% if form_paciente.observacao.errors %}
+                        <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_paciente.observacao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# Coluna Direita: Dados do Agendamento #}
+        <div class="w-full lg:w-1/3">
+            <div class="bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border-2 border-indigo-200 dark:border-indigo-500/30 p-8 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-7 pb-4 border-b border-indigo-200 dark:border-indigo-500/30 flex items-center gap-2">
+                    <i class="ph ph-clock text-indigo-500 text-xl"></i> Dados do Agendamento
+                </h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            Data e Hora da Consulta
+                        </label>
+                        {{ form_marcacao.data_hora }}
+                        {% if form_marcacao.data_hora.errors %}
+                            <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.data_hora.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            Professor / Responsável
+                        </label>
+                        {{ form_marcacao.professor }}
+                        <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1.5 uppercase tracking-wider">
+                            <i class="ph ph-info"></i> Filtrado por clínica e perfil do usuário.
+                        </p>
+                        {% if form_marcacao.professor.errors %}
+                            <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.professor.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    {# Box / Sala #}
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="ph ph-door text-sky-500 mr-1"></i> Box / Sala
+                            <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">(opcional)</span>
+                        </label>
+                        {{ form_marcacao.box }}
+                        <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1.5 uppercase tracking-wider">
+                            <i class="ph ph-shield-check text-emerald-500"></i> Validação de overbooking automática.
+                        </p>
+                        {% if form_marcacao.box.errors %}
+                            <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.box.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    {# Dupla de Alunos (somente Odontologia) #}
+                    {% if lista_espera.clinica.nome == 'OD' %}
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+                            <i class="ph ph-users-three text-teal-500 mr-1"></i> Dupla de Alunos
+                            <span class="text-xs font-normal text-slate-400 dark:text-slate-500 ml-1">(opcional)</span>
+                        </label>
+                        {{ form_marcacao.dupla }}
+                        <p class="text-[10px] text-slate-500 dark:text-slate-500 mt-1.5 uppercase tracking-wider">
+                            <i class="ph ph-tooth text-teal-500"></i> Exclusivo para Odontologia.
+                        </p>
+                        {% if form_marcacao.dupla.errors %}
+                            <p class="mt-1 text-xs text-rose-500 font-medium">{{ form_marcacao.dupla.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {# Erros gerais (overbooking) #}
+                    {% if form_marcacao.non_field_errors %}
+                        <div class="p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 text-xs font-medium flex items-start gap-2">
+                            <i class="ph ph-warning-circle text-lg flex-shrink-0 mt-0.5"></i>
+                            <span>{{ form_marcacao.non_field_errors.0 }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-indigo-200 dark:border-indigo-500/30">
+                    <button type="submit"
+                            class="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm shadow-md shadow-indigo-200 dark:shadow-indigo-900/50 transition flex items-center justify-center gap-2">
+                        <i class="ph ph-check-fat text-lg"></i> Confirmar Matrícula e Agendar
+                    </button>
+                    <p class="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
+                        Ao processar, o paciente será oficializado e sairá da fila de espera.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<script>
+    // Máscara de CPF e Verificação de Unicidade
+    document.addEventListener('DOMContentLoaded', function () {
+        const cpfInput = document.querySelector('input[name="cpf"]');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        if (cpfInput) {
+            // Máscara de CPF
+            cpfInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 11) value = value.slice(0, 11);
+                if (value.length > 9) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+                } else if (value.length > 6) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+                } else if (value.length > 3) {
+                    value = value.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+                }
+                e.target.value = value;
+            });
+
+            if (submitBtn) {
+                // Cria container dinamicamente para o erro do AJAX
+                const errorElement = document.createElement('p');
+                errorElement.id = 'cpf-ajax-error';
+                errorElement.className = 'mt-1 text-xs text-rose-500 font-medium hidden';
+                cpfInput.parentNode.insertBefore(errorElement, cpfInput.nextSibling);
+                
+                // Encontra o container de erro vindo do servidor
+                const serverErrors = cpfInput.parentNode.querySelectorAll('p:not(#cpf-ajax-error)');
+                
+                const checarCpfUnicidade = () => {
+                    const cpfRaw = cpfInput.value.replace(/\D/g, '');
+                    
+                    // Limpa mensagens anteriores
+                    errorElement.textContent = '';
+                    errorElement.classList.add('hidden');
+                    cpfInput.removeAttribute('aria-invalid');
+                    cpfInput.classList.remove('border-rose-500', 'focus:ring-rose-500', 'focus:border-rose-500', 'dark:border-rose-500');
+                    
+                    serverErrors.forEach(err => err.classList.add('hidden'));
+
+                    if (cpfRaw.length !== 11) {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                        submitBtn.style.cursor = 'pointer';
+                        return;
+                    }
+                    
+                    let excludeIdParam = '';
+                    {% if form_paciente.instance.pk %}
+                        excludeIdParam = '&exclude_id={{ form_paciente.instance.pk }}';
+                    {% endif %}
+                    
+                    fetch(`/cadastros/pacientes/checar-cpf/?cpf=${cpfRaw}${excludeIdParam}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.exists) {
+                                errorElement.textContent = 'Paciente com este CPF já cadastrado no sistema.';
+                                errorElement.classList.remove('hidden');
+                                cpfInput.setAttribute('aria-invalid', 'true');
+                                cpfInput.classList.add('border-rose-500', 'focus:ring-rose-500', 'focus:border-rose-500', 'dark:border-rose-500');
+                                submitBtn.disabled = true;
+                                submitBtn.style.opacity = '0.5';
+                                submitBtn.style.cursor = 'not-allowed';
+                            } else {
+                                submitBtn.disabled = false;
+                                submitBtn.style.opacity = '1';
+                                submitBtn.style.cursor = 'pointer';
+                            }
+                        })
+                        .catch(err => console.error('Erro ao verificar CPF:', err));
+                };
+
+                // Escuta mudança de input e blur
+                cpfInput.addEventListener('input', checarCpfUnicidade);
+                cpfInput.addEventListener('blur', checarCpfUnicidade);
+                
+                // Dispara no carregamento se já tiver 11 dígitos
+                if (cpfInput.value.replace(/\D/g, '').length === 11) {
+                    checarCpfUnicidade();
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

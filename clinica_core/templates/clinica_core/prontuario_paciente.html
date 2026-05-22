@@ -1,0 +1,149 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - Prontuário de {{ paciente.nome }}{% endblock %}
+{% block page_title %}Prontuário e Evolução Clínica{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-5xl mx-auto w-full">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <a href="{% url 'paciente_list' %}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+                <i class="ph ph-arrow-left"></i> Voltar para Lista
+            </a>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Prontuário Eletrônico (PEP)</h2>
+            <div class="flex items-center gap-3 mt-2">
+                <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <i class="ph ph-user text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-slate-900 dark:text-white font-medium">{{ paciente.nome }}</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs">CPF: {{ paciente.cpf|default:"Não informado" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nova Evolução Form -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm mb-8 transition-colors duration-300">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2 flex items-center gap-2">
+            <i class="ph ph-pencil-line text-indigo-600 dark:text-indigo-400"></i> Registrar Nova Evolução
+        </h3>
+        
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <div class="w-full">
+                {% if 'clinica' in form.fields %}
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Clínica Relacionada</label>
+                    {{ form.clinica }}
+                    {% if form.clinica.errors %}
+                        <p class="mt-1 text-sm text-rose-500">{{ form.clinica.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Descrição</label>
+                {{ form.descricao }}
+                {% if form.descricao.errors %}
+                    <p class="mt-1 text-sm text-rose-500">{{ form.descricao.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button type="submit" class="px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900/50">
+                    <i class="ph ph-check-circle"></i> Salvar Evolução
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Linha do Tempo de Evoluções -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm transition-colors duration-300">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6 border-b border-slate-200 dark:border-slate-700/50 pb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="ph ph-clock-counter-clockwise text-indigo-600 dark:text-indigo-400"></i> Histórico Clínico
+            </div>
+            <span class="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full">{{ evolucoes.count }} registros</span>
+        </h3>
+        
+        {% if evolucoes %}
+        <div class="relative border-l-2 border-indigo-100 dark:border-indigo-900/50 ml-4 pb-4">
+            {% for evolucao in evolucoes %}
+            <div class="mb-8 ml-6 relative">
+                <!-- Ponto na linha do tempo -->
+                <span class="absolute -left-[35px] flex items-center justify-center w-6 h-6 bg-indigo-100 dark:bg-indigo-900 rounded-full ring-4 ring-white dark:ring-darkcard">
+                    <i class="ph ph-stethoscope text-indigo-600 dark:text-indigo-400 text-xs"></i>
+                </span>
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                    <h4 class="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white flex-wrap">
+                        <i class="ph ph-user-circle text-slate-400"></i>
+                        {{ evolucao.user_create.get_full_name|default:evolucao.user_create.username|default:"Sistema" }}
+                        
+                        {% if evolucao.clinica %}
+                        <span class="ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-sky-100 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 font-bold text-[10px] rounded tracking-wide uppercase">
+                            <i class="ph ph-buildings"></i> {{ evolucao.clinica.get_nome_display }}
+                        </span>
+                        {% endif %}
+                        
+                        {% if evolucao.status == 'AGUARDANDO' %}
+                        <span class="ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 font-bold text-[10px] rounded tracking-wide uppercase">
+                            <span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span> Pendente
+                        </span>
+                        {% else %}
+                        <span class="ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] rounded tracking-wide uppercase">
+                            <i class="ph ph-check-circle"></i> Aprovado
+                        </span>
+                        {% endif %}
+                    </h4>
+                    <time class="text-xs font-medium text-slate-500 dark:text-slate-400 text-left sm:text-right mt-1 sm:mt-0 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">
+                        {{ evolucao.date_create|date:"d/m/Y - H:i" }}
+                    </time>
+                </div>
+                
+                <div class="p-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 text-sm whitespace-pre-wrap leading-relaxed">
+{{ evolucao.descricao }}
+                </div>
+                
+                {% if evolucao.status == 'APROVADO' %}
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-900/10 border-l-2 border-emerald-500 rounded-lg shrink-0 mt-3">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">Nota: {{ evolucao.nota|default:"--" }}</span>
+                        <span class="text-[10px] text-emerald-600 dark:text-emerald-500 pl-2 border-l border-emerald-200 dark:border-emerald-800">Avaliado por {{ evolucao.avaliador.nome|default:"Docente" }}</span>
+                    </div>
+                    {% if evolucao.observacao_supervisor %}
+                    <p class="text-xs text-emerald-800 dark:text-emerald-300 mt-1">{{ evolucao.observacao_supervisor }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if evolucao.status != 'APROVADO' %}
+                <div class="mt-2 text-right">
+                    <form method="POST" action="{% url 'evolucao_delete' paciente.pk evolucao.pk %}" class="inline-block" onsubmit="return confirm('Tem certeza que deseja remover esta evolução do prontuário? Esta ação não pode ser desfeita.');">
+                        {% csrf_token %}
+                        <button type="submit" class="text-xs font-medium text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 transition hover:underline">
+                            Remover evolução
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="py-12 text-center text-slate-500 dark:text-slate-500">
+            <i class="ph ph-clipboard-text text-4xl mb-3 opacity-50 mx-auto block w-max"></i>
+            <p>Nenhuma evolução registrada para este paciente ainda.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,269 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - {{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block nav_lista_espera %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-3xl mx-auto w-full">
+    
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ titulo }}</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Preencha os dados com atenção para adicionar o paciente à fila.</p>
+        </div>
+        <a href="{% url 'lista_espera_list' %}" class="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-medium transition flex items-center gap-2">
+            <i class="ph ph-arrow-left text-lg"></i> Voltar
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 md:p-8 shadow-sm dark:shadow-xl transition-colors duration-300">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+            <div class="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-lg">
+                <p class="text-rose-700 dark:text-rose-400 text-sm font-bold mb-2">Por favor, corrija os erros abaixo:</p>
+                <div class="text-sm text-rose-600 dark:text-rose-300">
+                    {{ form.errors }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Pessoa (ocupa 2 colunas) -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Nome do Paciente</label>
+                    <div class="relative">
+                        {{ form.pessoa }}
+                    </div>
+                </div>
+
+                <!-- Celular -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Celular</label>
+                    {{ form.celular }}
+                    <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">Ex: (11) 99999-9999</p>
+                </div>
+
+                <!-- Clínica -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Clínica</label>
+                    {{ form.clinica }}
+                    <div id="clinica-odonto-display" class="mt-3 p-3 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700/50 rounded-lg hidden flex items-center justify-between transition-all">
+                        <div>
+                            <p class="text-[10px] text-teal-600 dark:text-teal-400 font-bold uppercase mb-0.5 tracking-wider">Sub-clínica Selecionada</p>
+                            <p id="clinica-odonto-text" class="text-sm text-slate-800 dark:text-slate-200 font-bold cursor-pointer" onclick="abrirModal()">-</p>
+                        </div>
+                        <button type="button" onclick="abrirModal()" class="text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 transition w-8 h-8 flex items-center justify-center rounded-full hover:bg-teal-100 dark:hover:bg-teal-800/50">
+                            <i class="ph ph-pencil-simple text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="hidden">
+                    {{ form.clinica_odonto }}
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Status Inicial</label>
+                    {{ form.status }}
+                </div>
+
+                <!-- Data e Hora -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Data e Hora do Agendamento</label>
+                    {{ form.data_hora_marcacao }}
+                </div>
+
+                <!-- Observação (ocupa 2 colunas) -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Observações do Tratamento</label>
+                    <div class="relative">
+                        {{ form.observacao }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 mt-6 border-t border-slate-200 dark:border-slate-700/50 flex flex-col-reverse md:flex-row justify-end gap-4">
+                <a href="{% url 'lista_espera_list' %}" class="px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-sm text-center transition">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-bold text-sm transition shadow-md shadow-indigo-200 dark:shadow-indigo-600/30 flex items-center justify-center gap-2">
+                    <i class="ph ph-check-circle text-lg"></i> {{ btn_texto }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modal Clínica Odonto -->
+    <div id="modal-clinica-odonto" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity opacity-0">
+        <div class="bg-white dark:bg-darkcard rounded-2xl max-w-lg w-full p-6 shadow-2xl transform scale-95 transition-transform duration-300" id="modal-clinica-odonto-content">
+            <div class="flex items-center justify-between mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="ph ph-tooth text-teal-500"></i> Selecione a Turma/Clínica
+                </h3>
+                <button type="button" id="fechar-modal-btn" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Escolha para qual clínica específica de odontologia este paciente será direcionado.</p>
+            
+            <div class="space-y-3 max-h-64 overflow-y-auto pr-2 mb-6" id="lista-opcoes-odonto">
+                <!-- Javascript will populate this based on the hidden select options -->
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" id="confirmar-modal-btn" class="px-5 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 text-white font-bold text-sm transition pointer-events-none opacity-50 flex items-center gap-2 shadow-md shadow-teal-500/20">
+                    <i class="ph ph-check"></i> Confirmar Seleção
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const celularInput = document.getElementById('id_celular');
+        if (celularInput) {
+            celularInput.addEventListener('input', function(e) {
+                let val = e.target.value.replace(/\D/g, ''); 
+                if (val.length > 11) val = val.substring(0, 11);
+                
+                let formatted = val;
+                if (val.length > 0) {
+                    formatted = '(' + val.substring(0, 2);
+                    if (val.length > 2) {
+                        formatted += ') ' + val.substring(2, Math.min(7, val.length));
+                        if (val.length > 7) {
+                            formatted += '-' + val.substring(7, 11);
+                        }
+                    }
+                }
+                e.target.value = formatted;
+            });
+        }
+
+        // Lógica Modal Odontologia
+        const clinicaSelect = document.getElementById('id_clinica');
+        const clinicaOdontoSelect = document.getElementById('id_clinica_odonto_hidden');
+        const modal = document.getElementById('modal-clinica-odonto');
+        const modalContent = document.getElementById('modal-clinica-odonto-content');
+        const fecharBtn = document.getElementById('fechar-modal-btn');
+        const confirmarBtn = document.getElementById('confirmar-modal-btn');
+        const listaOpcoes = document.getElementById('lista-opcoes-odonto');
+        
+        let tempSelectedValue = null;
+
+        function renderOpcoes() {
+            listaOpcoes.innerHTML = '';
+            Array.from(clinicaOdontoSelect.options).forEach((opt, index) => {
+                if(opt.value) { // Ignorar opcao vazia
+                    const isSelected = clinicaOdontoSelect.value === opt.value;
+                    const el = document.createElement('div');
+                    el.className = `p-3 rounded-lg border-2 cursor-pointer transition-colors flex items-center gap-3 ${isSelected ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-700'}`;
+                    el.innerHTML = `
+                        <div class="w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? 'border-teal-500 bg-teal-500' : 'border-slate-300 dark:border-slate-600'}">
+                            ${isSelected ? '<i class="ph ph-check text-white text-xs"></i>' : ''}
+                        </div>
+                        <span class="font-bold text-sm text-slate-800 dark:text-slate-200 uppercase">${opt.text}</span>
+                    `;
+                    el.onclick = () => {
+                        tempSelectedValue = opt.value;
+                        Array.from(listaOpcoes.children).forEach(child => {
+                            child.classList.remove('border-teal-500', 'bg-teal-50', 'dark:bg-teal-900/20');
+                            child.classList.add('border-slate-200', 'dark:border-slate-700');
+                            child.querySelector('.w-5').className = "w-5 h-5 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center";
+                            child.querySelector('.w-5').innerHTML = '';
+                        });
+                        el.classList.remove('border-slate-200', 'dark:border-slate-700');
+                        el.classList.add('border-teal-500', 'bg-teal-50', 'dark:bg-teal-900/20');
+                        el.querySelector('.w-5').className = "w-5 h-5 rounded-full border border-teal-500 bg-teal-500 flex items-center justify-center";
+                        el.querySelector('.w-5').innerHTML = '<i class="ph ph-check text-white text-xs"></i>';
+                        
+                        confirmarBtn.classList.remove('pointer-events-none', 'opacity-50');
+                    };
+                    listaOpcoes.appendChild(el);
+                    
+                    if(isSelected) {
+                        tempSelectedValue = opt.value;
+                        confirmarBtn.classList.remove('pointer-events-none', 'opacity-50');
+                    }
+                }
+            });
+        }
+
+        function abrirModal() {
+            renderOpcoes();
+            modal.classList.remove('hidden');
+            // Pequeno delay para a transição do CSS rodar
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function fecharModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            
+            // Se fechou sem selecionar e tava em OD, talvez resetar Clinica para vazio?
+            // A regra não especificou, mantemos.
+        }
+
+        const clinicaOdontoDisplay = document.getElementById('clinica-odonto-display');
+        const clinicaOdontoText = document.getElementById('clinica-odonto-text');
+
+        function updateDisplay() {
+            if (clinicaOdontoSelect && clinicaOdontoSelect.value) {
+                const selectedOption = clinicaOdontoSelect.options[clinicaOdontoSelect.selectedIndex];
+                if (selectedOption) {
+                    clinicaOdontoText.textContent = selectedOption.text;
+                    clinicaOdontoDisplay.classList.remove('hidden');
+                }
+            } else {
+                clinicaOdontoDisplay.classList.add('hidden');
+            }
+        }
+
+        if (clinicaSelect) {
+            clinicaSelect.addEventListener('change', function(e) {
+                const selectedText = e.target.options[e.target.selectedIndex].text.toUpperCase();
+                if (selectedText.includes('ODONTO')) {
+                    abrirModal();
+                } else {
+                    clinicaOdontoSelect.value = ''; // Limpa se mudou pra outra
+                    updateDisplay();
+                }
+            });
+            
+            // Check immediately on load if it's already selected and no subgroup is chosen
+            if (clinicaSelect.value) {
+                const selectedText = clinicaSelect.options[clinicaSelect.selectedIndex].text.toUpperCase();
+                if (selectedText.includes('ODONTO') && !clinicaOdontoSelect.value) {
+                    abrirModal();
+                }
+            }
+        }
+
+        fecharBtn.addEventListener('click', fecharModal);
+        
+        confirmarBtn.addEventListener('click', function() {
+            if (tempSelectedValue) {
+                clinicaOdontoSelect.value = tempSelectedValue;
+                updateDisplay();
+                fecharModal();
+            }
+        });
+
+        // Initialize display on load if already exists
+        updateDisplay();
+    });
+</script>
+{% endblock %}

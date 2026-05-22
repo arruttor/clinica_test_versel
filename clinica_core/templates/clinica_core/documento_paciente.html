@@ -1,0 +1,147 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - Arquivos de {{ paciente.nome }}{% endblock %}
+{% block page_title %}Arquivos do Paciente{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-5xl mx-auto w-full">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <a href="{% url 'paciente_list' %}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+                <i class="ph ph-arrow-left"></i> Voltar para Lista
+            </a>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Arquivos e Documentos</h2>
+            <div class="flex items-center gap-3 mt-2">
+                <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                    <i class="ph ph-user text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-slate-900 dark:text-white font-medium">{{ paciente.nome }}</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-xs">CPF: {{ paciente.cpf|default:"Não informado" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Form -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 shadow-sm mb-8 transition-colors duration-300">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2">Enviar Novo Anexo</h3>
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                {% if 'clinica' in form.fields %}
+                <div class="md:col-span-3">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Clínica Relacionada</label>
+                    {{ form.clinica }}
+                    {% if form.clinica.errors %}
+                        <p class="mt-1 text-sm text-rose-500">{{ form.clinica.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.descricao.id_for_label }}">Descrição do Arquivo</label>
+                    {{ form.descricao }}
+                    {% if form.descricao.errors %}
+                        <p class="mt-1 text-sm text-rose-500">{{ form.descricao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.arquivo.id_for_label }}">Selecionar Arquivo <span class="text-xs font-normal text-slate-500">(Fotos, PDFs, Radiografias)</span></label>
+                    {{ form.arquivo }}
+                    {% if form.arquivo.errors %}
+                        <p class="mt-1 text-sm text-rose-500">{{ form.arquivo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button type="submit" class="px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900/50">
+                    <i class="ph ph-upload-simple"></i> Fazer Upload
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Arquivos -->
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm transition-colors duration-300">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
+            <h3 class="font-bold text-slate-900 dark:text-white">Anexos Salvos</h3>
+            <span class="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2.5 py-0.5 rounded-full">{{ documentos.count }}</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-max">
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                        <th class="px-6 py-4">Arquivo</th>
+                        <th class="px-6 py-4">Tamanho</th>
+                        <th class="px-6 py-4">Data do Upload</th>
+                        <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for doc in documentos %}
+                    <tr class="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="h-10 w-10 shrink-0 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center text-xl">
+                                    <i class="ph ph-file-text"></i>
+                                </div>
+                                <div class="max-w-[15rem] sm:max-w-xs truncate">
+                                    <a href="{{ doc.arquivo.url }}" target="_blank" class="text-slate-900 dark:text-white font-bold hover:text-indigo-600 dark:hover:text-indigo-400 truncate block">
+                                        {{ doc.descricao|default:"Sem Descrição" }}
+                                    </a>
+                                    <p class="text-slate-500 dark:text-slate-400 text-xs truncate mb-1">{{ doc.arquivo.name|cut:"documentos_pacientes/" }}</p>
+                                    {% if doc.clinica %}
+                                    <span class="inline-block px-2 py-0.5 bg-sky-100 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 font-bold text-[10px] rounded tracking-wide uppercase">
+                                        {{ doc.clinica.get_nome_display }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs">
+                            {{ doc.arquivo.size|filesizeformat }}
+                        </td>
+                        <td class="px-6 py-4 text-slate-600 dark:text-slate-400 text-xs">
+                            {{ doc.date_create|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ doc.arquivo.url }}" target="_blank" class="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" title="Visualizar/Baixar">
+                                    <i class="ph ph-download-simple text-lg"></i>
+                                </a>
+                                
+                                <form method="POST" action="{% url 'documento_paciente_delete' paciente.pk doc.pk %}" class="inline-block" onsubmit="return confirm('Tem certeza que deseja apagar permanentemente este arquivo?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 transition p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10" title="Excluir">
+                                        <i class="ph ph-trash text-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-slate-500 dark:text-slate-500">
+                            <i class="ph ph-folder-open text-4xl mb-3 opacity-50 mx-auto block w-max"></i>
+                            <p>Nenhum documento anexado para este paciente.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

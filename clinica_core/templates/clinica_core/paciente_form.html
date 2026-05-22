@@ -1,0 +1,231 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}ClínicaEdu - {{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-4xl mx-auto w-full">
+    
+    <div class="mb-8">
+        <a href="{% url 'paciente_list' %}" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 transition-colors mb-4 font-medium">
+            <i class="ph ph-arrow-left"></i> Voltar para Lista
+        </a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">{{ titulo }}</h2>
+        <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Preencha os dados do paciente com atenção. Campos com (*) são obrigatórios.</p>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6 sm:p-8 shadow-sm transition-colors duration-300">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <!-- Dados Pessoais -->
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2">Dados Pessoais</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.nome.id_for_label }}">Nome Completo <span class="text-rose-500">*</span></label>
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.nome.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.cpf.id_for_label }}">CPF</label>
+                        {{ form.cpf }}
+                        {% if form.cpf.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.cpf.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.data_nascimento.id_for_label }}">Data de Nascimento</label>
+                        {{ form.data_nascimento }}
+                        {% if form.data_nascimento.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.data_nascimento.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contato e Endereço -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2">Contato e Endereço</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.celular.id_for_label }}">Celular</label>
+                        {{ form.celular }}
+                        {% if form.celular.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.celular.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.email.id_for_label }}">E-mail</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.endereco.id_for_label }}">Endereço Completo</label>
+                        {{ form.endereco }}
+                        {% if form.endereco.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.endereco.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outros Detalhes -->
+            <div class="mt-8">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-700/50 pb-2">Detalhes Adicionais</h3>
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2" for="{{ form.observacao.id_for_label }}">Observações (Alergias, Prontuário, etc.)</label>
+                        {{ form.observacao }}
+                        {% if form.observacao.errors %}
+                        <p class="mt-2 text-sm text-rose-500">{{ form.observacao.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-700/50 flex justify-end gap-4 mt-8">
+                <a href="{% url 'paciente_list' %}" class="px-6 py-3 rounded-lg font-bold text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-bold transition flex items-center gap-2 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50">
+                    <i class="ph ph-floppy-disk text-lg"></i> {{ btn_texto }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cpfInput = document.getElementById('{{ form.cpf.id_for_label }}');
+            const submitBtn = document.querySelector('button[type="submit"]');
+            
+            if (cpfInput) {
+                cpfInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 11) value = value.slice(0, 11);
+                    
+                    if (value.length > 9) {
+                        value = value.replace(/^(\d{3})(\d{3})(\d{3})(\d{2}).*/, '$1.$2.$3-$4');
+                    } else if (value.length > 6) {
+                        value = value.replace(/^(\d{3})(\d{3})(\d{0,3}).*/, '$1.$2.$3');
+                    } else if (value.length > 3) {
+                        value = value.replace(/^(\d{3})(\d{0,3}).*/, '$1.$2');
+                    }
+                    
+                    e.target.value = value;
+                });
+
+                if (submitBtn) {
+                    const errorElement = document.createElement('p');
+                    errorElement.id = 'cpf-ajax-error';
+                    errorElement.className = 'mt-2 text-sm text-rose-500 hidden';
+                    cpfInput.parentNode.insertBefore(errorElement, cpfInput.nextSibling);
+                    
+                    const serverErrors = cpfInput.parentNode.querySelectorAll('p:not(#cpf-ajax-error)');
+                    
+                    const checarCpfUnicidade = () => {
+                        const cpfRaw = cpfInput.value.replace(/\D/g, '');
+                        
+                        errorElement.textContent = '';
+                        errorElement.classList.add('hidden');
+                        cpfInput.removeAttribute('aria-invalid');
+                        cpfInput.classList.remove('border-rose-500', 'focus:ring-rose-500', 'focus:border-rose-500', 'dark:border-rose-500');
+                        
+                        serverErrors.forEach(err => err.classList.add('hidden'));
+
+                        if (cpfRaw.length !== 11) {
+                            submitBtn.disabled = false;
+                            submitBtn.style.opacity = '1';
+                            submitBtn.style.cursor = 'pointer';
+                            return;
+                        }
+                        
+                        let excludeIdParam = '';
+                        {% if form.instance.pk %}
+                            excludeIdParam = '&exclude_id={{ form.instance.pk }}';
+                        {% endif %}
+                        
+                        fetch(`/cadastros/pacientes/checar-cpf/?cpf=${cpfRaw}${excludeIdParam}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.exists) {
+                                    errorElement.textContent = 'Paciente com este CPF já cadastrado no sistema.';
+                                    errorElement.classList.remove('hidden');
+                                    cpfInput.setAttribute('aria-invalid', 'true');
+                                    cpfInput.classList.add('border-rose-500', 'focus:ring-rose-500', 'focus:border-rose-500', 'dark:border-rose-500');
+                                    submitBtn.disabled = true;
+                                    submitBtn.style.opacity = '0.5';
+                                    submitBtn.style.cursor = 'not-allowed';
+                                } else {
+                                    submitBtn.disabled = false;
+                                    submitBtn.style.opacity = '1';
+                                    submitBtn.style.cursor = 'pointer';
+                                }
+                            })
+                            .catch(err => console.error('Erro ao verificar CPF:', err));
+                    };
+
+                    cpfInput.addEventListener('input', checarCpfUnicidade);
+                    cpfInput.addEventListener('blur', checarCpfUnicidade);
+                }
+                
+                // Disparar o input uma vez para formatar ao carregar se já tiver valor
+                if (cpfInput.value) {
+                    cpfInput.dispatchEvent(new Event('input'));
+                    if (cpfInput.value.replace(/\D/g, '').length === 11 && submitBtn) {
+                        setTimeout(() => {
+                            cpfInput.dispatchEvent(new Event('blur'));
+                        }, 0);
+                    }
+                }
+            }
+            
+            const celularInput = document.getElementById('{{ form.celular.id_for_label }}');
+            if (celularInput) {
+                celularInput.addEventListener('input', function(e) {
+                    // Guarda posição do cursor antes de formatar
+                    const raw = e.target.value.replace(/\D/g, '').slice(0, 11);
+                    let formatted = '';
+
+                    if (raw.length === 0) {
+                        formatted = '';
+                    } else if (raw.length <= 2) {
+                        formatted = '(' + raw;
+                    } else if (raw.length <= 7) {
+                        formatted = '(' + raw.slice(0, 2) + ') ' + raw.slice(2);
+                    } else if (raw.length <= 10) {
+                        formatted = '(' + raw.slice(0, 2) + ') ' + raw.slice(2, 6) + '-' + raw.slice(6);
+                    } else {
+                        // 11 dígitos: celular com 9 (ex: (31) 99999-9999)
+                        formatted = '(' + raw.slice(0, 2) + ') ' + raw.slice(2, 7) + '-' + raw.slice(7);
+                    }
+
+                    e.target.value = formatted;
+                });
+
+                // Disparar o input uma vez para formatar ao carregar se já tiver valor
+                if (celularInput.value) {
+                    celularInput.dispatchEvent(new Event('input'));
+                }
+            }
+        });
+    </script>
+</div>
+{% endblock %}

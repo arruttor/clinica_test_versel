@@ -1,0 +1,32 @@
+{% extends 'clinica_core/base.html' %}
+
+{% block title %}Excluir Docente{% endblock %}
+{% block page_title %}Excluir Docente{% endblock %}
+{% block nav_cadastros %}bg-slate-100 dark:bg-slate-800/80 text-indigo-600 dark:text-indigo-400{% endblock %}
+{% block submenu_cadastros %}{% endblock %}
+{% block caret_cadastros %}rotate-180{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-lg mx-auto w-full mt-10">
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-rose-200 dark:border-rose-900/50 p-8 shadow-sm text-center">
+        <div class="w-20 h-20 bg-rose-50 dark:bg-rose-500/10 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="ph ph-warning-circle text-4xl"></i>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Excluir Cadastro?</h2>
+        <p class="text-slate-500 dark:text-slate-400 mb-8">
+            Tem certeza que deseja suspender/excluir o acesso de aprovação do professor <strong class="text-slate-700 dark:text-slate-200">{{ professor.nome }}</strong>? Esta ação não pode ser desfeita.
+        </p>
+
+        <form method="POST" class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'professor_list' %}" class="px-6 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold transition">
+                Cancelar
+            </a>
+            <button type="submit" class="px-6 py-2.5 rounded-lg bg-rose-500 hover:bg-rose-600 dark:hover:bg-rose-600 text-white font-bold transition flex items-center justify-center gap-2 shadow-md shadow-rose-200 dark:shadow-rose-900/50">
+                <i class="ph ph-trash"></i> Sim, Excluir
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

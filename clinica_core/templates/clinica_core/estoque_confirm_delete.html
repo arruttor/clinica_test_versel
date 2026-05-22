@@ -1,0 +1,46 @@
+{% extends 'clinica_core/base.html' %}
+{% block title %}Excluir Item — {{ item.nome }}{% endblock %}
+{% block page_title %}Almoxarifado{% endblock %}
+{% block nav_estoque %}bg-slate-100 dark:bg-slate-800/80 text-amber-600 dark:text-amber-400{% endblock %}
+
+{% block content %}
+<div class="p-8 max-w-lg mx-auto">
+
+    <div class="mb-8">
+        <a href="{% url 'estoque_list' %}" class="inline-flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition mb-3">
+            <i class="ph ph-arrow-left"></i> Voltar ao Almoxarifado
+        </a>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Excluir Item</h2>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm p-8 text-center">
+        <div class="w-16 h-16 bg-rose-100 dark:bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <i class="ph ph-trash text-3xl text-rose-600 dark:text-rose-400"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">{{ item.nome }}</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Estoque atual: {{ item.estoque_atual }} {{ item.unidade }}</p>
+
+        {% if tem_movimentacoes %}
+        <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-amber-700 dark:text-amber-400 text-sm">
+            <i class="ph ph-warning-circle text-lg mr-1"></i>
+            Este item possui movimentações registradas e <strong>não pode ser excluído</strong>. Para desativá-lo, use o botão Editar.
+        </div>
+        <a href="{% url 'estoque_list' %}" class="mt-6 inline-block w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl transition text-center">
+            Voltar
+        </a>
+        {% else %}
+        <p class="text-sm text-rose-600 dark:text-rose-400 mt-4 mb-6">Esta ação é permanente e não pode ser desfeita.</p>
+        <form method="post" class="flex flex-col gap-3">
+            {% csrf_token %}
+            <button type="submit" class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition">
+                Confirmar Exclusão
+            </button>
+            <a href="{% url 'estoque_list' %}" class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl transition text-center">
+                Cancelar
+            </a>
+        </form>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
